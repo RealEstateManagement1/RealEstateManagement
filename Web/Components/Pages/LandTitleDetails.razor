@@ -1,0 +1,53 @@
+﻿@using Infrastructure.Services
+@page "/landtitles/{Id:guid}"
+@using LandTitleEntity = Domain.Entities.LandTitle
+@rendermode InteractiveServer
+
+@inject LandTitleService LandTitleService
+
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Title details</p>
+        <h1>Land Title Details</h1>
+    </div>
+    <a class="btn btn-brand btn-brand-lg" href="/landtitles">Back to list</a>
+</div>
+
+@if (landTitle is null)
+{
+    <div class="alert alert-soft">Land title not found.</div>
+}
+else
+{
+    <div class="detail-panel">
+        <dl>
+            <dt>Property ID</dt>
+            <dd class="font-monospace">@landTitle.PropertyId</dd>
+
+            <dt>Title Number</dt>
+            <dd>@landTitle.TitleNumber</dd>
+
+            <dt>Issue Date</dt>
+            <dd>@landTitle.IssueDate.ToString("dd MMM yyyy")</dd>
+
+            <dt>Expiry Date</dt>
+            <dd>@landTitle.ExpiryDate.ToString("dd MMM yyyy")</dd>
+
+            <dt>Status</dt>
+            <dd><span class="status-chip">@landTitle.Status</span></dd>
+        </dl>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private LandTitleEntity? landTitle;
+
+    protected override async Task OnInitializedAsync()
+    {
+        landTitle = await LandTitleService.GetByIdAsync(Id);
+    }
+}
+

@@ -1,0 +1,302 @@
+@page "/PropertyDetails/{PropertyId:int}"
+
+@using Application.Interfaces
+@using Application.DTO
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@using System.Text.Json
+
+@* @attribute [Authorize] *@
+
+@inject IPropertyService PropertyService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject Application.Interfaces.IIdentityService IdentityService
+
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+  
+    @* --- STATUS ACTION BAR --- *@
+    <div class="d-flex align-center justify-space-between pa-4 mb-4 mt-2 rounded shadow-sm bg-white">
+        <MudText Typo="Typo.h5" Color="Color.Primary" Style="font-weight:bold">Property Details</MudText>
+
+        <div class="d-flex gap-4">
+            <MudButton Variant="Variant.Outlined" 
+                       Color="Color.Secondary" 
+                       Href="/Properties">
+                Back to Properties
+            </MudButton>
+        </div>
+    </div>
+
+    <style>
+        .hover-zoom:hover {
+            transform: scale(1.02);
+        }
+    </style>
+
+    <MudGrid>
+        @* 1. PROPERTY IMAGES / GALLERY *@
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="rounded-lg border-l-4" Style="border-left-color: #10b981 !important; height: 100%;">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Property Gallery</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-center align-center" style="height: 350px;">
+                            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                        </div>
+                    }
+                    else
+                    {
+                        @if (propertyImages.Count > 0)
+                        {
+                            <div class="d-flex flex-column align-center">
+                                <div style="width: 100%; height: 350px; border-radius: 12px; overflow: hidden; border: 1px solid #e0e6ed; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05);" @onclick="OpenLightbox">
+                                    <img src="@propertyImages[activeImageIndex]" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" class="hover-zoom" />
+                                </div>
+                                @if (propertyImages.Count > 1)
+                                {
+                                    <div class="d-flex flex-wrap gap-2 mt-3 justify-center">
+                                        @for (int i = 0; i < propertyImages.Count; i++)
+                                        {
+                                            int index = i;
+                                            <div style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; border: 2px solid @(activeImageIndex == index ? "#3b82f6" : "#e0e6ed"); cursor: pointer; opacity: @(activeImageIndex == index ? "1" : "0.7"); transition: all 0.2s;" 
+                                                 @onclick="() => SelectImage(index)">
+                                                <img src="@propertyImages[index]" style="width: 100%; height: 100%; object-fit: cover;" />
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column align-center justify-center pa-8 border-dashed rounded-lg" style="height: 350px; border: 2px dashed #cbd5e1; border-radius: 12px;">
+                                <MudIcon Icon="@Icons.Material.Filled.HideImage" Style="font-size: 4rem; color: #cbd5e1;" />
+                                <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">No pictures uploaded for this property.</MudText>
+                            </div>
+                        }
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        @* 2. PROPERTY INFORMATION *@
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="rounded-lg border-l-4" Style="border-left-color: #3b82f6 !important; height: 100%;">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Property Information</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <img src="/duture-neza-logo.png" alt="Duture Neza Logo" style="height: 48px; width: auto; object-fit: contain;"/>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    @if (isLoading)
+                    {
+                        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+                    }
+                    else if (property != null)
+                    {
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Parcel Number</MudText>
+                                <MudText Typo="Typo.body1"><b>@property.ParcelNumber</b></MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Property Status</MudText>
+                                <MudText Typo="Typo.body1" Color="Color.Success"><b>@property.PropertyStatus</b></MudText>
+                            </MudItem>
+                            
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Estimated Value</MudText>
+                                <MudText Typo="Typo.body1"><b>@property.PropertyEstimatedValue.ToString("N0") RWF</b></MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Land Size</MudText>
+                                <MudText Typo="Typo.body1">@property.LandSize</MudText>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Land Use Type</MudText>
+                                <MudText Typo="Typo.body1">@property.LandUseType</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Location</MudText>
+                                <MudText Typo="Typo.body1">@property.PropertyLocation</MudText>
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudDivider Class="my-2" />
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Owner</MudText>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Phone" OnClick="ViewOwnerPhoneNumber">
+                                    View Owner's Number
+                                </MudButton>
+                                @if (!string.IsNullOrWhiteSpace(ownerPhoneNumber))
+                                {
+                                    <MudText Typo="Typo.body1" Class="mt-2"><b>@ownerPhoneNumber</b></MudText>
+                                }
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudDivider Class="my-2" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Document Type</MudText>
+                                <MudText Typo="Typo.body1">@property.PropertyDocumentType</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Document Reference</MudText>
+                                @if (!string.IsNullOrEmpty(property.PropertyDocuments) && property.PropertyDocuments.StartsWith("data:"))
+                                {
+                                    <MudButton Href="@property.PropertyDocuments" Target="_blank" Download="PropertyDocument" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Download">
+                                        Download Document
+                                    </MudButton>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body1">@property.PropertyDocuments</MudText>
+                                }
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudDivider Class="my-2" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Created At</MudText>
+                                <MudText Typo="Typo.body1">@property.CreatedAt.ToString("g")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Updated At</MudText>
+                                <MudText Typo="Typo.body1">@property.UpdatedAt.ToString("g")</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Error">Property not found.</MudAlert>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+    </MudGrid>
+
+    @* --- LIGHTBOX / PREVIEW DIALOG --- *@
+    @if (isLightboxOpen && propertyImages.Count > 0)
+    {
+        <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.85); z-index: 1500; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            <div style="position: absolute; top: 20px; right: 20px; z-index: 1510;">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Inherit" Style="color: white; font-size: 2rem;" @onclick="CloseLightbox" />
+            </div>
+            
+            <div class="d-flex align-center justify-space-between w-100 px-4" style="max-width: 1200px;">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBackIos" Color="Color.Inherit" Style="color: white; font-size: 2.5rem;" @onclick="PrevImage" Disabled="@(propertyImages.Count <= 1)" />
+                
+                <div style="max-width: 90%; max-height: 80vh; overflow: hidden; border-radius: 8px; display: flex; justify-content: center; align-items: center;">
+                    <img src="@propertyImages[activeImageIndex]" style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 8px;" />
+                </div>
+                
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Color="Color.Inherit" Style="color: white; font-size: 2.5rem;" @onclick="NextImage" Disabled="@(propertyImages.Count <= 1)" />
+            </div>
+            
+            <MudText Typo="Typo.body1" Style="color: white; margin-top: 15px;">Image @(activeImageIndex + 1) of @propertyImages.Count</MudText>
+        </div>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] 
+    public int PropertyId { get; set; }
+    
+    private PropertyDetailDTO property;
+    private bool isLoading = true;
+    private string? ownerPhoneNumber;
+
+    private List<string> propertyImages = new();
+    private int activeImageIndex = 0;
+    private bool isLightboxOpen = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+            property = await PropertyService.GetPropertyByIdAsync(PropertyId);
+            if (property == null)
+            {
+                Snackbar.Add("Property not found.", Severity.Error);
+            }
+            else if (!string.IsNullOrEmpty(property.PropertyImages))
+
+            {
+                try
+                {
+                    propertyImages = JsonSerializer.Deserialize<List<string>>(property.PropertyImages) ?? new List<string>();
+                }
+                catch
+                {
+                    propertyImages = new List<string>();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading property: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SelectImage(int index)
+    {
+        activeImageIndex = index;
+    }
+
+    private void OpenLightbox()
+    {
+        isLightboxOpen = true;
+    }
+
+    private void CloseLightbox()
+    {
+        isLightboxOpen = false;
+    }
+
+    private void PrevImage()
+    {
+        if (propertyImages.Count <= 1) return;
+        activeImageIndex = (activeImageIndex - 1 + propertyImages.Count) % propertyImages.Count;
+    }
+
+    private void NextImage()
+    {
+        if (propertyImages.Count <= 1) return;
+        activeImageIndex = (activeImageIndex + 1) % propertyImages.Count;
+    }
+
+    private async Task ViewOwnerPhoneNumber()
+    {
+        // TODO: Wire this to the real property owner/user mapping.
+        // Current PropertyDetailDTO/Property entity has no owner reference, so we cannot fetch the owner's phone yet.
+        Snackbar.Add("Owner phone number is not available yet.", Severity.Info);
+    }
+}

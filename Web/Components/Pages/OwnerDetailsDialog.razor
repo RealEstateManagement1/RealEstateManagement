@@ -1,0 +1,137 @@
+@using Domain.Entities
+@using Domain.ValueObjects
+@using MudBlazor
+
+<MudDialog>
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Primary" Style="color: #1e3932;" />
+            <MudText Typo="Typo.h5" Class="owner-title" Style="font-weight: 700; color: #1e3932;">Owner Details</MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudContainer Style="max-height: 70vh; overflow-y: auto;">
+            <MudGrid>
+                <!-- Personal Info -->
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 600; color: #1e3932; border-bottom: 2px solid #e8e8e8;" Class="pb-1 mb-2">
+                        Personal Information
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">First Name</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight: 500;">@Owner.FirstName</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Last Name</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight: 500;">@Owner.LastName</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Gender</MudText>
+                    <MudText Typo="Typo.body1">@Owner.sex.ToString()</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Date of Birth</MudText>
+                    <MudText Typo="Typo.body1">@Owner.DateOfBirth.ToString("dd MMM yyyy")</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">National ID (Identification Number)</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight: 500;">@Owner.IdentificationNumber</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Email</MudText>
+                    <MudText Typo="Typo.body1">@Owner.Email</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Phone Number</MudText>
+                    <MudText Typo="Typo.body1">@Owner.PhoneNumber</MudText>
+                </MudItem>
+
+                <!-- Family Info -->
+                <MudItem xs="12" Class="mt-4">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 600; color: #1e3932; border-bottom: 2px solid #e8e8e8;" Class="pb-1 mb-2">
+                        Family & Next of Kin
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Marital Status</MudText>
+                    <MudText Typo="Typo.body1">@Owner.Maritalstatus.ToString()</MudText>
+                </MudItem>
+                @if (Owner.Maritalstatus == Maritalstatus.Married)
+                {
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Spouse Name</MudText>
+                        <MudText Typo="Typo.body1">@Owner.SpouceName</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Spouse ID Number</MudText>
+                        <MudText Typo="Typo.body1">@Owner.SpouceIdNumber</MudText>
+                    </MudItem>
+                }
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Next of Kin</MudText>
+                    <MudText Typo="Typo.body1">@Owner.NextOfKin</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Kin Phone Number</MudText>
+                    <MudText Typo="Typo.body1">@Owner.KinPhoneNumber</MudText>
+                </MudItem>
+
+                <!-- Location Info -->
+                <MudItem xs="12" Class="mt-4">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 600; color: #1e3932; border-bottom: 2px solid #e8e8e8;" Class="pb-1 mb-2">
+                        Location / Address
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Province</MudText>
+                    <MudText Typo="Typo.body1">@Owner.Province</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">District</MudText>
+                    <MudText Typo="Typo.body1">@Owner.District</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Sector</MudText>
+                    <MudText Typo="Typo.body1">@Owner.Sector</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Cell</MudText>
+                    <MudText Typo="Typo.body1">@Owner.Cell</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Village</MudText>
+                    <MudText Typo="Typo.body1">@Owner.Village</MudText>
+                </MudItem>
+
+                <!-- Audit Info -->
+                <MudItem xs="12" Class="mt-4">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 600; color: #1e3932; border-bottom: 2px solid #e8e8e8;" Class="pb-1 mb-2">
+                        Audit Information
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Created By</MudText>
+                    <MudText Typo="Typo.body2">@Owner.CreatedBy</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Created At</MudText>
+                    <MudText Typo="Typo.body2">@Owner.CreatedAt.ToString("g")</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="Close" Style="background-color: #1e3932; color: #ffffff;">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public Owner Owner { get; set; } = new();
+
+    private void Close() => MudDialog.Close();
+}

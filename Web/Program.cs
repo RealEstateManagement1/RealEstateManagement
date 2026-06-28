@@ -1,43 +1,32 @@
 using Web.Components;
-using MudBlazor.Services;
-using Microsoft.EntityFrameworkCore;
-
-using Microsoft.Extensions.FileProviders;
 using Infrastructure.Data;
-using Infrastructure.DependencyInjection;
-using Domain.Entities;
-using Application.Services.Disputes;
+using Infrastructure.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Application.Interfaces;
-using Application.Services.Surveys;
-using Application.Services.PropertyTransfers;
-
-
+using Application.Services.Users;
+using Application.Services.Properties;
+using Infrastructure.Repositories;
+using MudBlazor.Services;
+using Microsoft.AspNetCore.Mvc;
+using Application.DTO;
+using Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. SERVICES REGISTRATION ---
 
-// Database Configuration
-var connectionString = builder.Configuration.GetConnectionString("LoanPlatformDBCONN")
-    ?? throw new InvalidOperationException("Connection string 'LoanPlatformDBCONN' is not configured.");
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString, x => x.MigrationsAssembly("Infrastructure")));
+// Register infrastructure services (includes DbContext)
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
-builder.Services.AddScoped(p => 
-    p.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
-
-// Identity Configuration (ONLY ONE REGISTRATION)
-// Note: Ensure your 'User' class in Infrastructure matches IdentityRole<int> if that's your preference
-// builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
-//     options.Password.RequireDigit = true;
-//     options.Password.RequiredLength = 8;
-// })
-// .AddEntityFrameworkStores<ApplicationDbContext>()
-// .AddDefaultTokenProviders();
+// Identity configuration
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 // Core Services
-// builder.Services.AddScoped<UserContext>();
 builder.Services.AddMudServices();
+builder.Services.AddScoped<IDialogService, DialogService>();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddControllers(); // Moved up from the bottom
 builder.Services.AddAuthorization(); // Moved up from the bottom
@@ -55,18 +44,79 @@ builder.Services.AddScoped<IPropertyTransferService, PropertyTransferService>();
 // --- 2. BUILD THE APP ---
 var app = builder.Build();
 
-// --- 3. MIDDLEWARE PIPELINE ---
-
+// --- 3. MIDDLEWARE PIPELINE ---.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseStatusCodePagesWithReExecute("/Error");
 app.UseHttpsRedirection();
 app.UseAntiforgery();
+
+// Add authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapStaticAssets();
+
+app.MapPost("/api/account/login", async (
+    [FromForm] string email,
+    [FromForm] string password,
+    [FromForm] string? rememberMe,
+    [FromForm] string? returnUrl,
+    [FromServices] IIdentityService identityService,
+    [FromServices] UserManager<User> userManager,
+    [FromServices] ApplicationDbContext dbContext,
+    HttpContext httpContext) =>
+{
+    bool isRemembered = rememberMe == "on" || rememberMe == "true";
+    var success = await identityService.LoginAsync(new LoginDTO
+    {
+        Email = email,
+        Password = password,
+        RememberMe = isRemembered
+    });
+
+    if (success)
+    {
+        // Get the logged-in user
+        var user = await userManager.FindByEmailAsync(email);
+        if (user != null)
+        {
+            // Get the associated Person entity
+            var person = await dbContext.Persons.FirstOrDefaultAsync(p => p.Id == user.PersonId);
+            
+            // Check if user has a role; if not, redirect to client dashboard
+            if (person != null && string.IsNullOrEmpty(person.Role))
+            {
+                return Results.Redirect("/client-dashboard");
+            }
+        }
+        
+        return Results.Redirect(string.IsNullOrEmpty(returnUrl) ? "/dashboard" : returnUrl);
+    }
+
+    return Results.Redirect("/account/login?error=Invalid email or password");
+})
+.DisableAntiforgery();
+
+app.MapGet("/api/account/logout", async (
+    [FromServices] SignInManager<User> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/account/login");
+});
+
+app.MapPost("/api/account/logout", async (
+    [FromServices] SignInManager<User> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/account/login");
+});
+
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 app.UseAuthentication(); // Must be before Authorization
 app.UseAuthorization();

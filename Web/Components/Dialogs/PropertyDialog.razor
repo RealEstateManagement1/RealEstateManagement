@@ -1,0 +1,239 @@
+@using Application.DTO
+@using MudBlazor
+@using System.Text.Json
+
+<MudDialog Style="border-radius:12px; overflow:hidden; max-width: 800px;">
+    <DialogContent>
+        <MudPaper Elevation="0" Class="pa-5 mb-4" 
+                  Style="background: linear-gradient(135deg, #f4f7fe 0%, #eef2fb 100%); border-radius: 12px; border: 1px solid #e0e6ed;">
+            <MudGrid AlignItems="AlignItems.Center">
+                <MudItem xs="8">
+                    <MudText Typo="Typo.h6" Style="font-weight:800; color: #1B2559;">
+                        @(ExistingProperty == null ? "Register New Property" : "Update Property Details")
+                    </MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-weight:600;">
+                        Please provide accurate information for the property record.
+                    </MudText>
+                </MudItem>
+                <MudItem xs="4" Class="d-flex justify-end">
+                    <img src="/duture-neza-logo.png" alt="Duture Neza Logo" style="height: 48px; width: auto; object-fit: contain;" />
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <EditForm Model="Model" OnValidSubmit="Submit">
+            <DataAnnotationsValidator />
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.ParcelNumber" Label="Parcel Number" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.LandSize" Label="Land Size" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect @bind-Value="Model.LandUseType" Label="Land Use Type" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                        <MudSelectItem Value="@("Residential")">Residential</MudSelectItem>
+                        <MudSelectItem Value="@("Commercial")">Commercial</MudSelectItem>
+                        <MudSelectItem Value="@("Industrial")">Industrial</MudSelectItem>
+                        <MudSelectItem Value="@("Agricultural")">Agricultural</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="Model.PropertyStatus" Label="Property Status" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="@("ForSale")">For sale</MudSelectItem>
+                            <MudSelectItem Value="@("ForRent")">For Rent</MudSelectItem>
+                            <MudSelectItem Value="@("SoldOut")">Sold out</MudSelectItem>
+                        </MudSelect>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.PropertyLocation" Label="Property Location" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="Model.PropertyEstimatedValue" Label="Estimated Value (RWF)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.PropertyDocumentType" Label="Document Type" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadDocument" Accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload">
+                                Upload Document
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
+                    @if (!string.IsNullOrEmpty(Model.PropertyDocuments))
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Success">Document securely attached.</MudText>
+                    }
+                </MudItem>
+
+                <MudItem xs="12" class="mt-2">
+                    <MudGrid>
+                        <MudItem xs="12" sm="6">
+                            <MudNumericField @bind-Value="Model.NumberOfRooms" Label="Number of Rooms" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudNumericField @bind-Value="Model.NumberOfBathrooms" Label="Number of Toilets / Bathrooms" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle2" Class="mb-1" Style="font-weight: 600; color: #1B2559;">Property Pictures</MudText>
+                        <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadImages" Accept=".png,.jpg,.jpeg" Multiple="true">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.AddPhotoAlternate">
+                                    Upload Pictures
+                                </MudButton>
+                            </ActivatorContent>
+                        </MudFileUpload>
+
+                        @if (uploadedImages != null && uploadedImages.Count > 0)
+                        {
+                            <div class="d-flex flex-wrap gap-3 mt-3">
+                                @foreach (var img in uploadedImages)
+                                {
+                                    <div style="position: relative; width: 100px; height: 100px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e6ed; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                        <img src="@img" style="width: 100%; height: 100%; object-fit: cover;" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                       Color="Color.Error"
+                                                       Size="Size.Small"
+                                                       Style="position: absolute; top: 2px; right: 2px; background-color: rgba(255,255,255,0.85);"
+                                                       OnClick="() => RemoveImage(img)" />
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </MudItem>
+            </MudGrid>
+            
+            <div class="mt-6 d-flex justify-end gap-3 pb-2">
+                <MudButton OnClick="Cancel" Variant="Variant.Outlined" Style="border-radius: 8px; font-weight: 600;">Cancel</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" Style="border-radius: 8px; font-weight: 600;">Save Property</MudButton>
+            </div>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public PropertyDetailDTO ExistingProperty { get; set; }
+
+    public class DialogModel
+    {
+        public string ParcelNumber { get; set; }
+        public string LandSize { get; set; }
+        public string LandUseType { get; set; }
+        public string PropertyStatus { get; set; }
+        public string PropertyLocation { get; set; }
+        public string PropertyDocuments { get; set; }
+        public decimal PropertyEstimatedValue { get; set; }
+        public string PropertyDocumentType { get; set; }
+        public string? PropertyImages { get; set; }
+
+        public int? NumberOfRooms { get; set; }
+        public int? NumberOfBathrooms { get; set; }
+    }
+
+    public DialogModel Model { get; set; } = new DialogModel();
+    private List<string> uploadedImages = new();
+
+    protected override void OnInitialized()
+    {
+        if (ExistingProperty != null)
+        {
+            Model.ParcelNumber = ExistingProperty.ParcelNumber;
+            Model.LandSize = ExistingProperty.LandSize;
+            Model.LandUseType = ExistingProperty.LandUseType;
+            Model.PropertyStatus = ExistingProperty.PropertyStatus;
+            Model.PropertyLocation = ExistingProperty.PropertyLocation;
+            Model.PropertyDocuments = ExistingProperty.PropertyDocuments;
+            Model.PropertyEstimatedValue = ExistingProperty.PropertyEstimatedValue;
+            Model.PropertyDocumentType = ExistingProperty.PropertyDocumentType;
+            Model.PropertyImages = ExistingProperty.PropertyImages;
+
+            if (!string.IsNullOrEmpty(Model.PropertyImages))
+            {
+                try
+                {
+                    uploadedImages = JsonSerializer.Deserialize<List<string>>(Model.PropertyImages) ?? new List<string>();
+                }
+                catch
+                {
+                    uploadedImages = new List<string>();
+                }
+            }
+        }
+    }
+
+    void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+    private async Task UploadDocument(IBrowserFile file)
+    {
+        if (file != null)
+        {
+            try
+            {
+                using var stream = file.OpenReadStream(maxAllowedSize: 10485760); // 10MB limit
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+                var base64 = Convert.ToBase64String(fileBytes);
+                Model.PropertyDocuments = $"data:{file.ContentType};base64,{base64}";
+            }
+            catch (Exception ex)
+            {
+                // Optionally handle file size exceeded or read errors
+                Console.WriteLine($"Upload failed: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task UploadImages(IReadOnlyList<IBrowserFile> files)
+    {
+        if (files != null)
+        {
+            foreach (var file in files)
+            {
+                try
+                {
+                    using var stream = file.OpenReadStream(maxAllowedSize: 10485760); // 10MB limit
+                    using var memoryStream = new MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+                    var fileBytes = memoryStream.ToArray();
+                    var base64 = Convert.ToBase64String(fileBytes);
+                    var imgData = $"data:{file.ContentType};base64,{base64}";
+                    uploadedImages.Add(imgData);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Upload failed: {ex.Message}");
+                }
+            }
+            UpdatePropertyImagesModel();
+        }
+    }
+
+    private void RemoveImage(string img)
+    {
+        uploadedImages.Remove(img);
+        UpdatePropertyImagesModel();
+    }
+
+    private void UpdatePropertyImagesModel()
+    {
+        Model.PropertyImages = JsonSerializer.Serialize(uploadedImages);
+    }
+}

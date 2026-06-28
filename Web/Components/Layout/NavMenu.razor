@@ -39,6 +39,10 @@
     }
     .mud-nav-link.active .mud-nav-link-icon {
         color: #049309 !important;
+        border-right: 4px solid #4318FF;
+    }
+    .mud-nav-link.active .mud-nav-link-icon {
+        color: #4318FF !important;
     }
 </style>
 
@@ -65,12 +69,30 @@
     </MudNavLink>
 
 @* <MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
+    <MudNavLink Href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
+        @(!IsMini ? "Reports" : "")
+    </MudNavLink>
+
+     <MudNavLink href="/accounts" Icon="@Icons.Material.Outlined.ManageAccounts">
+        @(!IsMini ? "Account" : "")
+    </MudNavLink>
+    
+    <MudNavLink href="/Properties" Icon="@Icons.Material.Outlined.Home">
+        @(!IsMini ? "Properties" : "")
+    </MudNavLink>
+    
+    @* <MudNavLink href="/loans" Icon="@Icons.Material.Outlined.AccountBalanceWallet">
+        @(!IsMini ? "My Loans" : "")
+    </MudNavLink> *@
+
+<MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
         @(!IsMini ? "LoanProducts" : "")
     </MudNavLink>
 
     <MudNavLink href="/Borrower" Icon="@Icons.Material.Outlined.People">
         @(!IsMini ? "Borrowers" : "")
     </MudNavLink> *@
+    </MudNavLink>
 
     @* <MudNavLink href="/ProvidedDocuments" Icon="@Icons.Material.Outlined.Description">
         @(!IsMini ? "Documents" : "")
@@ -80,6 +102,7 @@
     </MudNavLink> *@
 
 @* <MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
+<MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
     <MudNavLink href="/LoanApplication" Icon="@Icons.Material.Outlined.Assignment">
         @(!IsMini ? "Application" : "")
     </MudNavLink>
@@ -94,15 +117,16 @@
 </MudNavLink>
 
 </MudNavGroup> *@
+</MudNavGroup>
 
     @* <MudNavLink href="/Guarantor" Icon="@Icons.Material.Outlined.GppGood">
         @(!IsMini ? "Guarantors" : "")
     </MudNavLink> *@
      
-@* 
+
      <MudNavLink href="/Disbursements" Icon="@Icons.Material.Outlined.Money">
         @(!IsMini ? "Disbursement" : "")
-    </MudNavLink> *@
+    </MudNavLink>
 
      @* <MudNavLink href="/collateral" Icon="@Icons.Material.Outlined.Money">
         @(!IsMini ? "Collateral" : "")

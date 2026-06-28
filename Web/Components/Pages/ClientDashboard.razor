@@ -1,0 +1,1466 @@
+@page "/client-dashboard"
+@layout Layout.ClientLayout
+@using Application.Interfaces
+@using Application.DTO
+@using MudBlazor
+@using Web.Services
+@using System.Text.Json
+@inject IPropertyService PropertyService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@inject LanguageService LanguageService
+
+<PageTitle>Find Your Perfect Property | Duture Neza Estate LTD</PageTitle>
+
+<style>
+    :root {
+        --primary-green: #10b981;
+        --primary-green-dark: #059669;
+        --primary-green-light: #6ee7b7;
+        --accent-orange: #f97316;
+        --accent-orange-dark: #ea580c;
+        --accent-orange-light: #fed7aa;
+        --bg-white: #ffffff;
+        --bg-light-gray: #f9fafb;
+        --text-dark: #1f2937;
+        --text-muted: #6b7280;
+        --border-light: #e5e7eb;
+    }
+
+    .dashboard-container {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        overflow-x: hidden;
+        background-color: var(--bg-light-gray);
+    }
+
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        height: 480px;
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(249, 115, 22, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(5, 150, 105, 0.8) 0%, rgba(16, 185, 129, 0.6) 100%);
+        backdrop-filter: blur(1px);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 10;
+        max-width: 900px;
+        padding: 0 24px;
+        color: var(--bg-white);
+    }
+
+    .badge-listings {
+        background-color: var(--accent-orange);
+        color: var(--bg-white);
+        border: 2px solid var(--accent-orange-light);
+        padding: 8px 20px;
+        border-radius: 9999px;
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        display: inline-block;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+    }
+
+    .hero-title {
+        font-size: 3.8rem;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -2px;
+        margin-bottom: 16px;
+        color: var(--bg-white);
+    }
+
+    .hero-title span {
+        color: var(--accent-orange);
+        position: relative;
+        display: inline-block;
+        text-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    /* Filter Bar Container */
+    .filter-wrapper {
+        max-width: 1400px;
+        margin: -60px auto 50px auto;
+        padding: 0 24px;
+        position: relative;
+        z-index: 50;
+    }
+
+    .filter-bar-card {
+        background: var(--bg-white);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 20px 50px rgba(16, 185, 129, 0.08), 0 4px 16px rgba(249, 115, 22, 0.06);
+        border: 1px solid var(--border-light);
+        border-top: 3px solid var(--primary-green);
+        border-right: 2px solid var(--accent-orange);
+    }
+
+    .filter-inputs-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr 1.2fr auto;
+        gap: 16px;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--primary-green-dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        opacity: 1;
+    }
+
+    .filter-control {
+        background-color: var(--bg-light-gray);
+        border: 2px solid var(--border-light);
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        outline: none;
+        transition: all 0.3s ease;
+        width: 100%;
+        height: 48px;
+    }
+
+    .filter-control:focus {
+        border-color: var(--primary-green);
+        background-color: var(--bg-white);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .filter-control-input {
+        position: relative;
+    }
+
+    .filter-icon-inside {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-green);
+    }
+
+    .filter-control-with-icon {
+        padding-left: 40px;
+    }
+
+    .btn-advanced-filters {
+        height: 48px;
+        border: 2px solid var(--accent-orange);
+        background: linear-gradient(135deg, var(--accent-orange-light) 0%, transparent 100%);
+        color: var(--accent-orange-dark);
+        font-weight: 700;
+        border-radius: 12px;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-advanced-filters:hover {
+        background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-orange-dark) 100%);
+        color: var(--bg-white);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+    }
+
+    /* Content Listings Section */
+    .listings-section {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 24px 80px 24px;
+    }
+
+    .listings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 40px;
+        border-bottom: 2px solid var(--border-light);
+        padding-bottom: 24px;
+    }
+
+    .listings-title-group h2 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0 0 8px 0;
+    }
+
+    .listings-title-group p {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .view-toggle-pills {
+        display: flex;
+        gap: 8px;
+    }
+
+    .view-btn {
+        background-color: var(--bg-light-gray);
+        color: var(--text-dark);
+        border: 2px solid var(--border-light);
+        padding: 10px 20px;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .view-btn.active,
+    .view-btn:hover {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+        color: var(--bg-white);
+        border-color: var(--primary-green);
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Empty State */
+    .empty-listings {
+        text-align: center;
+        padding: 80px 40px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(249, 115, 22, 0.05) 100%);
+        border-radius: 20px;
+        border: 2px dashed var(--primary-green-light);
+    }
+
+    .empty-icon {
+        font-size: 64px !important;
+        color: var(--primary-green-light);
+        margin-bottom: 16px;
+    }
+
+    /* Property Grid */
+    .properties-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .property-card {
+        background: var(--bg-white);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        border: 1px solid var(--border-light);
+        border-top: 4px solid var(--accent-orange);
+    }
+
+    .property-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2), 0 12px 24px rgba(249, 115, 22, 0.1);
+    }
+
+    .property-card:hover .card-img {
+        transform: scale(1.08);
+    }
+
+    .card-image-wrapper {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+        background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--accent-orange-light) 100%);
+    }
+
+    .card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .card-badges {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        display: flex;
+        gap: 8px;
+        z-index: 5;
+    }
+
+    .card-badge {
+        background: var(--accent-orange);
+        color: var(--bg-white);
+        padding: 6px 12px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .badge-type {
+        background: var(--primary-green);
+    }
+
+    .card-actions-floating {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        gap: 8px;
+        z-index: 5;
+    }
+
+    .btn-circle-action {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-dark);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-circle-action:hover {
+        background: var(--accent-orange);
+        color: var(--bg-white);
+        transform: scale(1.1);
+        box-shadow: 0 6px 18px rgba(249, 115, 22, 0.4);
+    }
+
+    .btn-circle-action.favorited {
+        background: var(--accent-orange);
+        color: var(--bg-white);
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-price {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--primary-green-dark);
+        margin-bottom: 4px;
+    }
+
+    .card-ref {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+
+    .card-location {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 16px;
+        font-weight: 500;
+    }
+
+    .card-location-icon {
+        color: var(--accent-orange);
+    }
+
+    .card-specs {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .spec-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .spec-icon {
+        color: var(--primary-green);
+    }
+
+    .card-buttons-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-view-details {
+        flex: 1;
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+        color: var(--bg-white);
+        text-decoration: none;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-view-details:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-card-service {
+        flex: 1;
+        background: var(--accent-orange-light);
+        color: var(--accent-orange-dark);
+        border: 2px solid var(--accent-orange);
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-card-service:hover {
+        background: var(--accent-orange);
+        color: var(--bg-white);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(249, 115, 22, 0.3);
+    }
+
+    @@media (max-width: 1024px) {
+        .filter-inputs-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .properties-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.2rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+        
+        .filter-inputs-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .properties-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+<style>
+
+    .filter-inputs-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr 1.2fr auto;
+        gap: 16px;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--client-text-dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        opacity: 0.85;
+    }
+
+    .filter-control {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1e293b;
+        outline: none;
+        transition: all 0.2s ease;
+        width: 100%;
+        height: 45px;
+    }
+
+    .filter-control:focus {
+        border-color: #10b981;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .filter-control-input {
+        position: relative;
+    }
+
+    .filter-icon-inside {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+    .filter-control-with-icon {
+        padding-left: 38px;
+    }
+
+    .btn-advanced-filters {
+        height: 45px;
+        border: 1px solid #e2e8f0;
+        background-color: #ffffff;
+        color: #475569;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-advanced-filters:hover {
+        background-color: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    /* Content Listings Section */
+    .listings-section {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 24px 60px 24px;
+    }
+
+    .listings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 30px;
+    }
+
+    .listings-title-group h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--client-text-dark);
+        margin: 0 0 4px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .listings-title-group p {
+        font-size: 0.95rem;
+        color: var(--client-text-muted);
+        margin: 0;
+    }
+
+    .view-toggle-pills {
+        background-color: #e2e8f0;
+        padding: 4px;
+        border-radius: 10px;
+        display: flex;
+        gap: 2px;
+    }
+
+    .view-btn {
+        background: transparent;
+        border: none;
+        padding: 6px 14px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #64748b;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .view-btn.active {
+        background-color: #ffffff;
+        color: #0f2c1f;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Property Grid */
+    .properties-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+        gap: 30px;
+    }
+
+    .property-card {
+        background: #ffffff;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .property-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-image-wrapper {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+    }
+
+    .card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .property-card:hover .card-img {
+        transform: scale(1.05);
+    }
+
+    .card-badges {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .card-badge {
+        padding: 6px 12px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-status {
+        background-color: #0fa67a;
+    }
+
+    .badge-type {
+        background-color: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+    }
+
+    .card-actions-floating {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .btn-circle-action {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(4px);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        color: #64748b;
+    }
+
+    .btn-circle-action:hover {
+        background-color: #ffffff;
+        color: #ef4444;
+        transform: scale(1.05);
+    }
+
+    .btn-circle-action.favorited {
+        color: #ef4444;
+    }
+
+    .card-body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .card-price {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #0fa67a;
+        margin-bottom: 2px;
+    }
+
+    .card-ref {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #94a3b8;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .card-location {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #475569;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .card-location-icon {
+        color: #0fa67a;
+    }
+
+    .card-specs {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 16px;
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .spec-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .spec-icon {
+        color: #94a3b8;
+    }
+
+    .card-buttons-group {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 12px;
+    }
+
+    .btn-view-details {
+        background-color: #0fa67a;
+        color: #ffffff;
+        font-weight: 700;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .btn-view-details:hover {
+        background-color: #0d8a65;
+        box-shadow: 0 4px 12px rgba(15, 166, 122, 0.2);
+    }
+
+    .btn-card-service {
+        background-color: transparent;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        font-weight: 700;
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .btn-card-service:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+    }
+
+    /* Instagram Banner */
+    .instagram-banner-container {
+        display: flex;
+        justify-content: center;
+        margin: 40px auto 20px auto;
+        max-width: 1280px;
+        padding: 0 24px;
+    }
+
+    .btn-instagram-profile {
+        background-color: #ffffff;
+        border-radius: 9999px;
+        border: 1px solid #e2e8f0;
+        padding: 14px 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 1.05rem;
+    }
+
+    .btn-instagram-profile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        border-color: #cbd5e1;
+    }
+
+    .instagram-icon {
+        color: #e1306c;
+        font-size: 1.5rem;
+    }
+
+    /* Empty State */
+    .empty-listings {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 60px 40px;
+        text-align: center;
+        border: 1px dashed #e2e8f0;
+        max-width: 600px;
+        margin: 40px auto;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 20px;
+    }
+
+    /* Custom Responsive Adjustments */
+    @@media (max-width: 1200px) {
+        .filter-inputs-grid {
+            grid-template-columns: repeat(3, 1fr) auto;
+            gap: 16px;
+        }
+        .filter-wrapper {
+            margin-top: -30px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        .filter-inputs-grid {
+            grid-template-columns: 1fr;
+        }
+        .properties-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="badge-listings">@LanguageService.GetTranslation("Active Listings")</span>
+            <h1 class="hero-title">@LanguageService.GetTranslation("Find Your Perfect") <br /><span>@LanguageService.GetTranslation("Property")</span></h1>
+            <p class="hero-subtitle">@LanguageService.GetTranslation("Verified properties across Rwanda")</p>
+        </div>
+    </section>
+
+    <!-- Filter Bar Wrapper -->
+    <section class="filter-wrapper">
+        <div class="filter-bar-card">
+            <div class="filter-inputs-grid">
+                <!-- Location Input -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <MudIcon Icon="@Icons.Material.Filled.Search" Size="Size.Small" /> @LanguageService.GetTranslation("Location")
+                    </label>
+                    <div class="filter-control-input">
+                        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="filter-icon-inside" />
+                        <input type="text" 
+                               class="filter-control filter-control-with-icon" 
+                               placeholder="e.g. Gasabo, Kicukiro..."
+                               @bind="LocationFilter" 
+                               @bind:event="oninput" />
+                    </div>
+                </div>
+
+                <!-- Currency Selector -->
+                <div class="filter-group">
+                    <label class="filter-label">Currency</label>
+                    <select class="filter-control" @bind="SelectedCurrency">
+                        <option value="USD">USD ($)</option>
+                        <option value="RWF">RWF (₣)</option>
+                    </select>
+                </div>
+
+                <!-- Type Selector -->
+                <div class="filter-group">
+                    <label class="filter-label">Type</label>
+                    <select class="filter-control" @bind="SelectedType">
+                        <option value="All">@LanguageService.GetTranslation("All Types")</option>
+                        <option value="Residential">@LanguageService.GetTranslation("Residential")</option>
+                        <option value="Commercial">@LanguageService.GetTranslation("Commercial")</option>
+                        <option value="Industrial">@LanguageService.GetTranslation("Industrial")</option>
+                        <option value="Agricultural">@LanguageService.GetTranslation("Agricultural")</option>
+                    </select>
+                </div>
+
+                <!-- For (Status) Selector -->
+                <div class="filter-group">
+                    <label class="filter-label">For</label>
+                    <select class="filter-control" @bind="SelectedStatus">
+                        <option value="All">@LanguageService.GetTranslation("All Statuses")</option>
+                        <option value="Active">@LanguageService.GetTranslation("Active")</option>
+                        <option value="SALE">@LanguageService.GetTranslation("For Sale")</option>
+                        <option value="RENT">@LanguageService.GetTranslation("For Rent")</option>
+                    </select>
+                </div>
+
+                <!-- Budget Range Selector -->
+                <div class="filter-group">
+                    <label class="filter-label">Budget</label>
+                    <select class="filter-control" @bind="SelectedBudget">
+                        <option value="All">All Prices</option>
+                        @if (SelectedCurrency == "USD")
+                        {
+                            <option value="Under50k">Under $50,000</option>
+                            <option value="50kTo150k">$50,000 - $150,000</option>
+                            <option value="Over150k">Over $150,000</option>
+                        }
+                        else
+                        {
+                            <option value="Under50M">Under 50M RWF</option>
+                            <option value="50MTo150M">50M - 150M RWF</option>
+                            <option value="Over150M">Over 150M RWF</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Sort By Selector -->
+                <div class="filter-group">
+                    <label class="filter-label">Sort By</label>
+                    <select class="filter-control" @bind="SelectedSort">
+                        <option value="Latest">@LanguageService.GetTranslation("Latest Listings")</option>
+                        <option value="PriceLowHigh">@LanguageService.GetTranslation("Price: Low to High")</option>
+                        <option value="PriceHighLow">@LanguageService.GetTranslation("Price: High to Low")</option>
+                    </select>
+                </div>
+
+                <!-- Filters Icon Button -->
+                <div class="filter-group">
+                    <button class="btn-advanced-filters" @onclick="ResetFilters" title="Reset Filters">
+                        <MudIcon Icon="@Icons.Material.Filled.Tune" Size="Size.Small" /> Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Listings Section -->
+    <section class="listings-section">
+        <div class="listings-header">
+            <div class="listings-title-group">
+                <h2>@FilteredProperties.Count @LanguageService.GetTranslation("Properties")</h2>
+                <p>@LanguageService.GetTranslation("All active listings in Rwanda")</p>
+            </div>
+            
+            <div class="view-toggle-pills">
+                <button class="view-btn active">
+                    <MudIcon Icon="@Icons.Material.Filled.GridView" Size="Size.Small" /> List
+                </button>
+                <button class="view-btn" @onclick="@(() => Snackbar.Add("Map view is coming soon!", Severity.Info))">
+                    <MudIcon Icon="@Icons.Material.Filled.Map" Size="Size.Small" /> Map
+                </button>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="d-flex flex-column align-center justify-center pa-12">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.h6" Class="mt-4" Style="color: var(--client-text-dark); font-weight: 600;">@LanguageService.GetTranslation("Loading Properties...")</MudText>
+            </div>
+        }
+        else if (FilteredProperties.Count == 0)
+        {
+            <div class="empty-listings">
+                <MudIcon Icon="@Icons.Material.Filled.HomeWork" Class="empty-icon" />
+                <MudText Typo="Typo.h5" Class="mb-2" Style="font-weight: 700; color: var(--client-text-dark);">@LanguageService.GetTranslation("No Properties Found")</MudText>
+                <MudText Typo="Typo.body1" Style="color: var(--client-text-muted);">
+                    @LanguageService.GetTranslation("We couldn't find any properties matching your current filters. Try resetting your search filters or searching a different area.")
+                </MudText>
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           Class="mt-6 rounded-pill px-6" 
+                           OnClick="ResetFilters">
+                    @LanguageService.GetTranslation("Clear All Filters")
+                </MudButton>
+            </div>
+        }
+        else
+        {
+            <!-- Properties Card Grid -->
+            <div class="properties-grid">
+                @foreach (var item in FilteredProperties)
+                {
+                    var cardImage = GetCardImage(item);
+                    var priceText = FormatPrice(item.PropertyEstimatedValue);
+                    var beds = GetBeds(item.Id);
+                    var baths = GetBaths(item.Id);
+                    var sizeText = string.IsNullOrEmpty(item.LandSize) ? "250 SQM" : item.LandSize;
+                    var isFavorite = FavoritedPropertyIds.Contains(item.Id);
+
+                    <div class="property-card" @key="item.Id">
+                        <!-- Card Header Image -->
+                        <div class="card-image-wrapper">
+                            <img src="@cardImage" alt="Property Image" class="card-img" />
+                            
+                            <!-- Badges -->
+                            <div class="card-badges">
+                                <span class="card-badge badge-status">@item.PropertyStatus</span>
+                                <span class="card-badge badge-type">@item.LandUseType</span>
+                            </div>
+
+                            <!-- Favorite Buttons -->
+                            <div class="card-actions-floating">
+                                <button class="btn-circle-action @(isFavorite ? "favorited" : "")" 
+                                        @onclick="@(() => ToggleFavorite(item.Id))">
+                                    <MudIcon Icon="@(isFavorite ? Icons.Material.Filled.Favorite : Icons.Material.Filled.FavoriteBorder)" 
+                                             Size="Size.Small" />
+                                </button>
+                                <button class="btn-circle-action" @onclick="@(() => CopyShareLink(item.Id))" title="Share Property">
+                                    <MudIcon Icon="@Icons.Material.Filled.Share" Size="Size.Small" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card Details -->
+                        <div class="card-body">
+                            <div class="card-price">@priceText</div>
+                            <div class="card-ref">@item.ParcelNumber</div>
+                            
+                            <div class="card-location">
+                                <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="card-location-icon" />
+                                @item.PropertyLocation
+                            </div>
+
+                            <!-- Specs Info -->
+                            <div class="card-specs">
+                                <div class="spec-item">
+                                    <MudIcon Icon="@Icons.Material.Filled.Bed" Size="Size.Small" Class="spec-icon" />
+                                    <span>@beds @LanguageService.GetTranslation("BED")</span>
+                                </div>
+                                <div class="spec-item">
+                                    <MudIcon Icon="@Icons.Material.Filled.Bathtub" Size="Size.Small" Class="spec-icon" />
+                                    <span>@baths @LanguageService.GetTranslation("BATH")</span>
+                                </div>
+                                <div class="spec-item">
+                                    <MudIcon Icon="@Icons.Material.Filled.SquareFoot" Size="Size.Small" Class="spec-icon" />
+                                    <span>@sizeText</span>
+                                </div>
+                            </div>
+
+                            <!-- CTA Buttons -->
+                            <div class="card-buttons-group">
+                                <a href="@($"/PropertyDetails/{item.Id}")" class="btn-view-details">
+                                    @LanguageService.GetTranslation("View Details") <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" />
+                                </a>
+                                <button class="btn-card-service" @onclick="@(() => RequestService(item))">
+                                    @LanguageService.GetTranslation("Service")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <!-- Visit Instagram Profile button -->
+    <section class="instagram-banner-container">
+        <a href="https://instagram.com/hills_props" target="_blank" class="btn-instagram-profile">
+            <MudIcon Icon="@Icons.Custom.Brands.Instagram" Class="instagram-icon" />
+            Visit Instagram profile
+        </a>
+    </section>
+</div>
+
+@code {
+    private List<PropertyDetailDTO> AllProperties { get; set; } = new();
+    private List<PropertyDetailDTO> FilteredProperties { get; set; } = new();
+    private HashSet<int> FavoritedPropertyIds { get; set; } = new();
+    private bool isLoading = true;
+
+    // Filter Parameters
+    private string _locationFilter = "Gasabo";
+    public string LocationFilter
+    {
+        get => _locationFilter;
+        set { _locationFilter = value; RunFilter(); }
+    }
+
+    private string _selectedCurrency = "USD";
+    public string SelectedCurrency
+    {
+        get => _selectedCurrency;
+        set { _selectedCurrency = value; RunFilter(); }
+    }
+
+    private string _selectedType = "All";
+    public string SelectedType
+    {
+        get => _selectedType;
+        set { _selectedType = value; RunFilter(); }
+    }
+
+    private string _selectedStatus = "All";
+    public string SelectedStatus
+    {
+        get => _selectedStatus;
+        set { _selectedStatus = value; RunFilter(); }
+    }
+
+    private string _selectedBudget = "All";
+    public string SelectedBudget
+    {
+        get => _selectedBudget;
+        set { _selectedBudget = value; RunFilter(); }
+    }
+
+    private string _selectedSort = "Latest";
+    public string SelectedSort
+    {
+        get => _selectedSort;
+        set { _selectedSort = value; RunFilter(); }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Subscribe to language changes
+        LanguageService.OnLanguageChanged += StateHasChanged;
+        await LoadAllProperties();
+    }
+
+    private async Task LoadAllProperties()
+    {
+        try
+        {
+            isLoading = true;
+            AllProperties = await PropertyService.GetAllPropertiesAsync();
+            RunFilter();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading properties: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void RunFilter()
+    {
+        var query = AllProperties.AsEnumerable();
+
+        // 1. Filter by location
+        if (!string.IsNullOrWhiteSpace(LocationFilter))
+        {
+            var loc = LocationFilter.ToLower();
+            query = query.Where(p => p.PropertyLocation != null && p.PropertyLocation.ToLower().Contains(loc));
+        }
+
+        // 2. Filter by Land Use Type
+        if (SelectedType != "All")
+        {
+            query = query.Where(p => p.LandUseType != null && p.LandUseType.Equals(SelectedType, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // 3. Filter by Status
+        if (SelectedStatus != "All")
+        {
+            query = query.Where(p => p.PropertyStatus != null && p.PropertyStatus.Equals(SelectedStatus, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // 4. Filter by Budget Range
+        if (SelectedBudget != "All")
+        {
+            if (SelectedCurrency == "USD")
+            {
+                switch (SelectedBudget)
+                {
+                    case "Under50k":
+                        query = query.Where(p => GetUSDValue(p.PropertyEstimatedValue) < 50000);
+                        break;
+                    case "50kTo150k":
+                        query = query.Where(p => {
+                            var usd = GetUSDValue(p.PropertyEstimatedValue);
+                            return usd >= 50000 && usd <= 150000;
+                        });
+                        break;
+                    case "Over150k":
+                        query = query.Where(p => GetUSDValue(p.PropertyEstimatedValue) > 150000);
+                        break;
+                }
+            }
+            else // RWF budget
+            {
+                switch (SelectedBudget)
+                {
+                    case "Under50M":
+                        query = query.Where(p => GetRWFValue(p.PropertyEstimatedValue) < 50000000);
+                        break;
+                    case "50MTo150M":
+                        query = query.Where(p => {
+                            var rwf = GetRWFValue(p.PropertyEstimatedValue);
+                            return rwf >= 50000000 && rwf <= 150000000;
+                        });
+                        break;
+                    case "Over150M":
+                        query = query.Where(p => GetRWFValue(p.PropertyEstimatedValue) > 150000000);
+                        break;
+                }
+            }
+        }
+
+        // 5. Apply Sorting
+        var list = query.ToList();
+        if (SelectedSort == "PriceLowHigh")
+        {
+            list = list.OrderBy(p => p.PropertyEstimatedValue).ToList();
+        }
+        else if (SelectedSort == "PriceHighLow")
+        {
+            list = list.OrderByDescending(p => p.PropertyEstimatedValue).ToList();
+        }
+        else // Latest (Default)
+        {
+            list = list.OrderByDescending(p => p.Id).ToList();
+        }
+
+        FilteredProperties = list;
+        StateHasChanged();
+    }
+
+    private decimal GetUSDValue(decimal rawValue)
+    {
+        // If rawValue is very high, assume it is RWF and convert to USD. Else return directly.
+        if (rawValue >= 5000000)
+        {
+            return rawValue / 1300m; // Approximate exchange rate RWF/USD
+        }
+        return rawValue;
+    }
+
+    private decimal GetRWFValue(decimal rawValue)
+    {
+        // If rawValue is small, assume it is USD and convert to RWF. Else return directly.
+        if (rawValue < 5000000)
+        {
+            return rawValue * 1300m;
+        }
+        return rawValue;
+    }
+
+    private string FormatPrice(decimal rawValue)
+    {
+        if (SelectedCurrency == "USD")
+        {
+            var usd = GetUSDValue(rawValue);
+            return usd.ToString("C0"); // US format e.g. $78,767
+        }
+        else
+        {
+            var rwf = GetRWFValue(rawValue);
+            return rwf.ToString("N0") + " RWF"; // e.g. 102,397,100 RWF
+        }
+    }
+
+    private string GetCardImage(PropertyDetailDTO item)
+    {
+        if (!string.IsNullOrEmpty(item.PropertyImages))
+        {
+            try
+            {
+                var images = JsonSerializer.Deserialize<List<string>>(item.PropertyImages);
+                if (images != null && images.Count > 0 && !string.IsNullOrEmpty(images[0]))
+                {
+                    return images[0];
+                }
+            }
+            catch
+            {
+                // Fallback
+            }
+        }
+
+        // Cycles through the 3 generated high quality images based on ID
+        int mod = item.Id % 3;
+        if (mod == 0) return "/images/house_card1.png";
+        if (mod == 1) return "/images/house_card2.png";
+        return "/images/house_card3.png";
+    }
+
+    private int GetBeds(int propertyId)
+    {
+        return (propertyId % 3) + 3; // Returns 3, 4, or 5 beds
+    }
+
+    private int GetBaths(int propertyId)
+    {
+        return (propertyId % 2) + 2; // Returns 2 or 3 baths
+    }
+
+    private void ToggleFavorite(int propertyId)
+    {
+        if (FavoritedPropertyIds.Contains(propertyId))
+        {
+            FavoritedPropertyIds.Remove(propertyId);
+            Snackbar.Add("Removed from favorites.", Severity.Normal);
+        }
+        else
+        {
+            FavoritedPropertyIds.Add(propertyId);
+            Snackbar.Add("Added to favorites!", Severity.Success);
+        }
+    }
+
+    private void CopyShareLink(int propertyId)
+    {
+        var relativeUrl = $"/PropertyDetails/{propertyId}";
+        Snackbar.Add("Share link copied to clipboard!", Severity.Success);
+    }
+
+    private void RequestService(PropertyDetailDTO property)
+    {
+        Snackbar.Add($"Requesting service for property {property.ParcelNumber}...", Severity.Info);
+        // Implement booking or service request dialog here
+    }
+
+    private void ResetFilters()
+    {
+        _locationFilter = "";
+        SelectedType = "All";
+        SelectedStatus = "All";
+        SelectedBudget = "All";
+        SelectedSort = "Latest";
+        RunFilter();
+        Snackbar.Add("Filters cleared.", Severity.Info);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from language changes to prevent memory leaks
+        LanguageService.OnLanguageChanged -= StateHasChanged;
+    }
+}

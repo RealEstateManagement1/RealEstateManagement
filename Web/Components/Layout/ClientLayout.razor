@@ -1,0 +1,334 @@
+@inherits LayoutComponentBase
+@using Application.Interfaces
+@using System.Security.Claims
+@using MudBlazor
+@using Web.Services
+@inject NavigationManager NavigationManager
+@inject IUserContext UserContext
+@inject LanguageService LanguageService
+
+<MudThemeProvider Theme="_theme" @bind-IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<style>
+    :root {
+        --primary-green: #10b981;
+        --primary-green-dark: #059669;
+        --primary-green-light: #6ee7b7;
+        --accent-orange: #f97316;
+        --accent-orange-dark: #ea580c;
+        --accent-orange-light: #fed7aa;
+        --bg-white: #ffffff;
+        --bg-light-gray: #f9fafb;
+        --text-dark: #1f2937;
+        --text-muted: #6b7280;
+        --border-light: #e5e7eb;
+    }
+
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-light-gray);
+        font-family: 'Outfit', 'Inter', 'Century Gothic', sans-serif;
+    }
+
+    .client-layout {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Top Navbar Styles */
+    .client-navbar {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+        backdrop-filter: blur(10px);
+        border-bottom: 3px solid var(--accent-orange);
+        height: 80px;
+        padding: 0 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+
+    .brand-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        transition: transform 0.3s ease;
+    }
+
+    .brand-section:hover {
+        transform: scale(1.02);
+    }
+
+    .brand-logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bg-white);
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        border: 2px solid var(--accent-orange);
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+    }
+
+    .brand-text {
+        color: var(--bg-white);
+        font-weight: 800;
+        font-size: 1.3rem;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .brand-text span {
+        color: var(--accent-orange);
+        font-style: italic;
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .nav-link-pill {
+        color: rgba(255, 255, 255, 0.85);
+        text-decoration: none;
+        padding: 8px 20px;
+        border-radius: 9999px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 2px solid transparent;
+    }
+
+    .nav-link-pill:hover {
+        color: var(--accent-orange);
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: var(--accent-orange);
+    }
+
+    .nav-link-pill.active {
+        color: var(--primary-green-dark);
+        background-color: var(--bg-white);
+        border-color: var(--accent-orange);
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+    }
+
+    .navbar-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    /* Language Selector */
+    .lang-selector {
+        background-color: rgba(255, 255, 255, 0.15);
+        border: 2px solid var(--accent-orange);
+        border-radius: 9999px;
+        padding: 4px;
+        display: flex;
+        gap: 2px;
+    }
+
+    .lang-btn {
+        color: rgba(255, 255, 255, 0.7);
+        background: transparent;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .lang-btn:hover {
+        color: var(--accent-orange);
+    }
+
+    .lang-btn.active {
+        color: var(--primary-green-dark);
+        background-color: var(--accent-orange);
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-login {
+        color: var(--bg-white);
+        background: transparent;
+        border: 2px solid var(--bg-white);
+        font-size: 0.95rem;
+        font-weight: 700;
+        padding: 10px 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border-radius: 8px;
+    }
+
+    .btn-login:hover {
+        background-color: var(--bg-white);
+        color: var(--primary-green);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-get-started {
+        background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-orange-dark) 100%);
+        color: var(--bg-white);
+        text-decoration: none;
+        padding: 12px 26px;
+        border-radius: 9999px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.35);
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-get-started:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 28px rgba(249, 115, 22, 0.45);
+    }
+
+    /* Main Content Area */
+    .client-main-content {
+        flex: 1;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    @@media (max-width: 768px) {
+        .client-navbar {
+            padding: 0 20px;
+        }
+        .nav-links {
+            display: none;
+        }
+    }
+</style>
+
+<div class="client-layout">
+    <!-- Top Navigation Header -->
+    <header class="client-navbar">
+        <a href="/client-dashboard" class="brand-section">
+            <div class="brand-logo-container">
+                <img src="/duture-neza-logo.png" alt="Duture Neza Estate Logo" style="height: 32px; width: auto; object-fit: contain;" />
+            </div>
+            <div class="brand-text">
+                Duture Neza <span>Estate LTD</span>
+            </div>
+        </a>
+
+        <div class="nav-links">
+            <a href="/client-dashboard" class="nav-link-pill active">
+                <MudIcon Icon="@Icons.Material.Filled.Home" Size="Size.Small" /> @GetTranslation("Home")
+            </a>
+            <a href="/client-dashboard#about" class="nav-link-pill">
+                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" /> @GetTranslation("About")
+            </a>
+        </div>
+
+        <div class="navbar-right">
+            <!-- Language Selector -->
+            <div class="lang-selector">
+                <button class="lang-btn @(LanguageService.CurrentLanguage == "EN" ? "active" : "")" @onclick="@(async () => await ChangeLanguage("EN"))">EN</button>
+                <button class="lang-btn @(LanguageService.CurrentLanguage == "RW" ? "active" : "")" @onclick="@(async () => await ChangeLanguage("RW"))">RW</button>
+            </div>
+
+            <!-- Login / Logout State -->
+            @if (UserContext.IsAuthenticated)
+            {
+                <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense="true" Class="ml-2">
+                    <ActivatorContent>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="cursor-pointer">
+                            <MudAvatar Color="Color.Success" Size="Size.Medium" Style="font-weight: bold; font-family: sans-serif; color: white;">
+                                @UserContext.FullName.Substring(0, Math.Min(2, UserContext.FullName.Length)).ToUpper()
+                            </MudAvatar>
+                            <MudText Typo="Typo.body2" Class="d-none d-sm-inline" Style="color: white; font-weight: 600;">
+                                @UserContext.FullName
+                            </MudText>
+                        </MudStack>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MudMenuItem OnClick="GoToAdminDashboard">@GetTranslation("Admin Portal")</MudMenuItem>
+                        <MudMenuItem OnClick="Logout">@GetTranslation("Logout")</MudMenuItem>
+                    </ChildContent>
+                </MudMenu>
+            }
+            else
+            {
+                <a href="/account/login" class="btn-login">@GetTranslation("Login")</a>
+                <a href="/RegisterUser" class="btn-get-started">@GetTranslation("Get Started")</a>
+            }
+        </div>
+    </header>
+
+    <!-- Page Body -->
+    <main class="client-main-content">
+        @Body
+    </main>
+</div>
+
+@code {
+    private bool _isDarkMode = false;
+
+    private MudTheme _theme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#0fa67a",
+            Background = "#f5f8f6",
+            TextPrimary = "#0f2c1f",
+            AppbarBackground = "#092518",
+            DrawerBackground = "#ffffff"
+        }
+    };
+
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes to trigger re-render
+        LanguageService.OnLanguageChanged += StateHasChanged;
+    }
+
+    private string GetTranslation(string key)
+    {
+        return LanguageService.GetTranslation(key);
+    }
+
+    private async Task ChangeLanguage(string language)
+    {
+        LanguageService.CurrentLanguage = language;
+        Console.WriteLine($"Language changed to: {language}");
+    }
+
+    private void Logout()
+    {
+        NavigationManager.NavigateTo("/account/logout");
+    }
+
+    private void GoToAdminDashboard()
+    {
+        NavigationManager.NavigateTo("/Properties");
+    }
+
+    public void Dispose()
+    {
+        LanguageService.OnLanguageChanged -= StateHasChanged;
+    }
+}

@@ -10,6 +10,9 @@ namespace Domain.Entities
         public string PropertyDocuments {get;set;}
         public decimal PropertyEstimatedValue{get;set;}
         public string PropertyDocumentType{get;set;}
+        public string? PropertyImages {get;set;}
+        public int? NumberOfRooms {get;set;}
+        public int? NumberOfBathrooms {get;set;}
 
         //Auditing
         
@@ -17,6 +20,8 @@ namespace Domain.Entities
         public DateTime UpdatedAt {get;set;}
         public string CreatedBy {get;set;}
         public string UpdatedBy {get;set;}
+        
+   
          
         
     }

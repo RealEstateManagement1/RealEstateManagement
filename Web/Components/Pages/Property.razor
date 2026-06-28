@@ -1,7 +1,7 @@
 @page "/Properties"
 @using Application.DTO
 @using Application.Interfaces
-
+@using Web.Components.Dialogs
 @using Microsoft.AspNetCore.Authorization
 
 @inject IPropertyService PropertyService
@@ -184,6 +184,7 @@
                 PropertyDocuments = data.PropertyDocuments,
                 PropertyEstimatedValue = data.PropertyEstimatedValue,
                 PropertyDocumentType = data.PropertyDocumentType,
+                PropertyImages = data.PropertyImages,
                 CreatedBy = "System" // Typically fetched from IUserContext
             };
 
@@ -219,6 +220,7 @@
                 PropertyDocuments = data.PropertyDocuments,
                 PropertyEstimatedValue = data.PropertyEstimatedValue,
                 PropertyDocumentType = data.PropertyDocumentType,
+                PropertyImages = data.PropertyImages,
                 UpdatedBy = "System" // Typically fetched from IUserContext
             };
 

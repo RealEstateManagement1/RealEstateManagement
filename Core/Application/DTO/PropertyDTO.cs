@@ -13,6 +13,7 @@ namespace Application.DTO
         public decimal PropertyEstimatedValue { get; set; }
         public string PropertyDocumentType { get; set; }
         public string CreatedBy { get; set; }
+        public string? PropertyImages { get; set; }
     }
 
     public class PropertyUpdateDTO
@@ -26,6 +27,7 @@ namespace Application.DTO
         public decimal PropertyEstimatedValue { get; set; }
         public string PropertyDocumentType { get; set; }
         public string UpdatedBy { get; set; }
+        public string? PropertyImages { get; set; }
     }
 
     public class PropertyDetailDTO
@@ -43,5 +45,6 @@ namespace Application.DTO
         public DateTime UpdatedAt { get; set; }
         public string CreatedBy { get; set; }
         public string UpdatedBy { get; set; }
+        public string? PropertyImages { get; set; }
     }
 }

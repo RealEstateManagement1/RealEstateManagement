@@ -40,8 +40,14 @@ namespace Infrastructure.Repositories
                 PropertyDocuments = dto.PropertyDocuments,
                 PropertyEstimatedValue = dto.PropertyEstimatedValue,
                 PropertyDocumentType = dto.PropertyDocumentType,
+                PropertyImages = dto.PropertyImages,
                 CreatedBy = dto.CreatedBy,
                 UpdatedBy = dto.CreatedBy,
+                // if PropertyDocuments can be null in UI, ensure we fail fast with a clear message
+                // (DB column is NOT NULL)
+                // NOTE: DTO PropertyDocuments is non-nullable, but if your caller passes null it will end up here.
+                // You should validate at the API/UI layer.
+                
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -65,18 +71,19 @@ namespace Infrastructure.Repositories
                 property.PropertyDocuments = dto.PropertyDocuments;
                 property.PropertyEstimatedValue = dto.PropertyEstimatedValue;
                 property.PropertyDocumentType = dto.PropertyDocumentType;
+                property.PropertyImages = dto.PropertyImages;
                 property.UpdatedBy = dto.UpdatedBy;
                 property.UpdatedAt = DateTime.UtcNow;
 
                 await _dbContext.SaveChangesAsync();
             }
         }
+
         public async Task DeletePropertyAsync(int id)
         {
             var property = await _dbContext.Properties.FindAsync(id);
             if (property != null)
             {
-                
                 _dbContext.Properties.Remove(property);
                 await _dbContext.SaveChangesAsync();
             }

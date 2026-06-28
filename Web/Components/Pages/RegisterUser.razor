@@ -1,0 +1,197 @@
+@page "/RegisterUser"
+@layout AuthLayout
+@using Application.DTO
+@using Domain.ValueObjects
+@rendermode InteractiveServer
+@using Application.Interfaces
+@using Application.Services.Users
+@inject IIdentityService IdentityService
+@inject NavigationManager NavigationManager
+
+<style>
+    /* Force the page to fill the screen and remove scrolling */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Removes scrollbars */
+    }
+
+    /* Logo Hover Effect */
+    .logo-main {
+        cursor: pointer;
+    }
+
+    .logo-main:hover {
+        transform: scale(1.08) !important;
+        filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4)) !important;
+    }
+</style>
+
+<PageTitle>Register | Duture Neza Estate LTD</PageTitle>
+
+@* The Container centers everything on the screen with the same light background *@
+<MudContainer MaxWidth="MaxWidth.False" Class="d-flex align-center justify-center pa-0" Style="height: 100vh; background-color: #f5f5f5;">
+    
+    @* Main Small Card - Fixed size to match Login *@
+    <MudPaper Elevation="4" Class="d-flex" Style="width: 900px; height: 680px; border-radius: 24px; overflow: hidden;">
+        
+        <MudGrid Spacing="0">
+            @* Left Side: Dark Marketing (Matches Login exactly) *@
+            <MudItem md="5" Class="d-none d-md-flex flex-column align-center justify-center pa-8" Style="background: linear-gradient(135deg, #03aa35 0%, #029e2f 100%); color: white;">
+                @* Logo Display *@
+                <div Class="d-flex justify-center mb-8">
+                    <img src="/duture-neza-logo.png" alt="Duture Neza Estate Logo" Style="width: 140px; height: 140px; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3)); transition: transform 0.3s ease;" Class="logo-main" />
+                </div>
+
+                <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight: 700; line-height: 1.2; color: white;" Class="mb-2">
+                    Welcome to
+                </MudText>
+                <MudText Typo="Typo.h5" Align="Align.Center" Style="font-weight: 800; font-size: 1.5rem; color: #ffd700; margin-bottom: 24px;">
+                    Duture Neza Estate
+                </MudText>
+                
+                <MudText Typo="Typo.body2" Align="Align.Center" Style="color: rgba(255,255,255,0.9); line-height: 1.6; max-width: 280px;">
+                    Join us to discover premium properties and find your perfect home in some of Rwanda's most sought-after locations.
+                </MudText>
+
+                <MudPaper Elevation="0" Style="width: 140px; height: 260px; background: #c9e7ea; border: 4px solid #02086b; border-radius: 20px;" Class="pa-3 mt-8">
+                    <MudPaper Style="height: 8px; width: 40px; background: #12013e; margin: 0 auto 15px auto;" Elevation="0" />
+                    <MudPaper Style="height: 30px; width: 100%; background: #0918e5; border-radius: 4px;" Elevation="0" Class="mb-2" />
+                    <MudPaper Style="height: 90px; width: 100%; background: #02086b; border-radius: 4px;" Elevation="0" />
+                </MudPaper>
+                
+                <MudText Typo="Typo.caption" Class="mt-8" Style="opacity: 0.5;">© 2026 Duture Neza Estate LTD</MudText>
+            </MudItem>
+
+            @* Right Side: Registration Form *@
+            <MudItem xs="12" md="7" Class="pa-8 d-flex flex-column" Style="background-color: white; height: 100%;">
+                
+                @* Top Branding Bar *@
+                <div class="d-flex align-center mb-8" style="border-bottom: 3px solid #f0f0f0; padding-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: linear-gradient(135deg, #03aa35 0%, #029e2f 100%); padding: 8px 12px; border-radius: 12px;">
+                            <img src="/duture-neza-logo.png" alt="Duture Neza Estate Logo" style="width: 48px; height: 48px; object-fit: contain;" />
+                        </div>
+                        <div>
+                            <MudText Typo="Typo.h6" Style="font-weight: 800; color: #02086b; margin: 0;">Duture Neza Estate</MudText>
+                            <MudText Typo="Typo.caption" Style="color: #03aa35; font-weight: 600; margin: 0;">Your Property Partner</MudText>
+                        </div>
+                    </div>
+                    <MudSpacer />
+                    <MudLink href="/account/login" Underline="Underline.None" Color="Color.Primary" Style="font-size: 0.9rem; font-weight: 700; color: #03aa35;">Sign In</MudLink>
+                </div>
+
+                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: 700; color: #e15114ff">Create Account</MudText>
+
+                <EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+                    <DataAnnotationsValidator />
+
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4" Variant="Variant.Outlined">@ErrorMessage</MudAlert>
+                    }
+
+                    @* Compact Name Row *@
+                    <MudGrid Spacing="2" Class="mb-4">
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="Model.FirstName" Label="First Name" Variant="Variant.Outlined" Margin="Margin.Dense" For="@(() => Model.FirstName)" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="Model.LastName" Label="Last Name" Variant="Variant.Outlined" Margin="Margin.Dense" For="@(() => Model.LastName)" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudSelect T="Sex"
+                                       Label="Sex"
+                                       @bind-Value="Model.Sex"
+                                       Variant="Variant.Outlined"
+                                       Dense="true"
+                                       Margin="Margin.Dense"
+                                       For="@(() => Model.Sex)">
+                                @foreach (Sex item in Enum.GetValues(typeof(Sex)))
+                                {
+                                    <MudSelectItem T="Sex" Value="item">@item.ToString()</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudDatePicker Label="Date of Birth" @bind-Date="Model.DateOfBirth" Variant="Variant.Outlined" Margin="Margin.Dense" For="@(() => Model.DateOfBirth)" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="Model.Role" Label="Role" Variant="Variant.Outlined" Margin="Margin.Dense" For="@(() => Model.Role)" />
+                        </MudItem>
+                         <MudItem  xs="6">
+                           <MudTextField @bind-Value="Model.PhoneNumber"  Label="Phone Number" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-4" Placeholder="+079 456 7890" For="@(() => Model.PhoneNumber)" />
+                         </MudItem>
+                    </MudGrid>
+
+                    <MudTextField @bind-Value="Model.Email" Label="Email Address" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-4" For="@(() => Model.Email)" />
+
+                    <MudTextField @bind-Value="Model.Password" Label="Password" Variant="Variant.Outlined" Margin="Margin.Dense"  InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"  OnAdornmentClick="TogglePasswordVisibility" For="@(() => Model.Password)" />
+
+                    @* Action Button - Same Gradient Style *@
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               FullWidth="true" 
+                               Disabled="@_isProcessing"
+                               Class="py-3 shadow-none mt-6"
+                               Style="background: #e15114ff; color: white; border-radius: 25px; text-transform: none; font-weight: 700;">
+                        @if (_isProcessing)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        }
+                        <span>Create Account</span>
+                    </MudButton>
+                </EditForm>
+
+                @* Footer Context *@
+                <MudSpacer />
+                <div class="d-flex justify-space-between align-center" style="opacity: 0.5;">
+                    <MudText Typo="Typo.caption">English</MudText>
+                    <MudText Typo="Typo.caption">Contact Us</MudText>
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private RegisterUserDTO Model { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+    private bool _isProcessing = false;
+    private bool _isPasswordVisible = false;
+    private InputType _passwordInput = InputType.Password;
+    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    public void TogglePasswordVisibility()
+    {
+        if (_isPasswordVisible)
+        {
+            _isPasswordVisible = false;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInput = InputType.Password;
+        }
+        else
+        {
+            _isPasswordVisible = true;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInput = InputType.Text;
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        if (_isProcessing) return;
+        _isProcessing = true;
+        try
+        {
+            await IdentityService.RegisterUser(Model);
+            NavigationManager.NavigateTo("/account/login");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally { _isProcessing = false; }
+    }
+}

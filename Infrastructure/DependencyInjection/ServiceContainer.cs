@@ -1,30 +1,42 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.SqlServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using Infrastructure.Data;
 using Application.Interfaces;
-using Application.Services.Owners;
 using Infrastructure.Repositories;
-using Application.Service.Properties;
+
+using Domain.Entities;
+using Infrastructure.Identity;
+
 
 namespace Infrastructure.DependencyInjection
-{ 
+{
     public static class ServiceContainer
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // add infrastructure services here, e.g., DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("RealEstateManagementDBCONN"));
-                options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-            });
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped
+                );
+                // Register the UserContext as a scoped service
+                services.AddScoped<IUserContext, UserContext>();
+                services.AddHttpContextAccessor();
+ 
+                // Register repositories
+                services.AddScoped<IPerson, PersonRepository>();
+                services.AddScoped<IProperty, PropertyRepository>();
+                services.AddScoped<IPropertyService, Application.Services.Properties.PropertyService>();
 
-            // Register repositories
-            services.AddHttpContextAccessor();
-            services.AddScoped<IOwner, OwnerRepository>();
-            services.AddScoped<IOwnerService, OwnerService>();
-            services.AddScoped<IPropertyService, PropertyService>();
+                  
+
+                 //Regester identity service
+                 services.AddAuthenticationService(configuration);
+               
+
+            // Register other infrastructure services here
 
             return services;
         }

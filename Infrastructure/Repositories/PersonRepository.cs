@@ -32,9 +32,11 @@ namespace Infrastructure.Repositories
                 DateOfBirth = DateTime.Now,
                 phoneNumber = personDTO.phoneNumber,
                 Email = personDTO.Email,
+               
                 CreatedBy=personDTO.Email, 
                 UpdateBy=personDTO.Email,
                           
+
             };
             dbContext.Persons.Add(_person);
             dbContext.SaveChanges();
@@ -47,12 +49,14 @@ namespace Infrastructure.Repositories
             {
                 _person.FirstName = personDTO.FirstName;
                 _person.LastName = personDTO.LastName;
-                _person.Sex = personDTO.Sex; 
+                _person.Sex = personDTO.Sex;
+                
+                
                 dbContext.SaveChanges();
             }
         }
     }
- }   
+    }   
     
     
         

@@ -1,0 +1,76 @@
+
+@using Application.Interfaces
+@using Domain.Entities
+@using MudBlazor
+
+@* @using Domain.ValueObjects *@
+@using Application.Services.Disputes
+@using System.Globalization
+
+@inject NavigationManager NavigationManager
+
+ <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="BackToDisputes" StartIcon="@Icons.Material.Filled.ArrowBack">
+                    Back to List
+                </MudButton>
+<MudDialog>
+    
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2"/> Account Details
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_disputes == null)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else
+        {
+            <MudGrid Spacing="2">
+                <MudItem xs="6">
+                    <MudTextField Label="Dispute ID" Value="@_disputes.Id" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="PropertyId" Value="@_disputes.PropertyId" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="Complainant" Value="@_disputes.Complainant" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="Description" Value="@_disputes.Description" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+               
+                <MudItem xs="6">
+                    <MudTextField Label="Status" Value="@_disputes.Status" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+                             
+                    @* <MudItem xs="6">
+                        <MudTextField Label="AccountType" Value="@_accounts.AccountType" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>  *@
+              
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public int Id { get; set; } 
+    
+    [Inject] IDisputeService DisputeService { get; set; }
+
+    private Dispute _disputes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _disputes = await DisputeService.GetDisputeByIdAsync(Id);
+    }
+    private void Close() => MudDialog.Close();
+     private void BackToDisputes()
+    {
+        NavigationManager.NavigateTo("/Disputes");
+    }
+}

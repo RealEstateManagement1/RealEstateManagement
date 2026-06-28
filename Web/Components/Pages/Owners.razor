@@ -1,0 +1,257 @@
+@page "/owners"
+@rendermode InteractiveServer
+
+@using Domain.Entities
+@using Domain.ValueObjects
+@using Application.DTO
+@using Application.Services.Owners
+@using MudBlazor
+@inject IOwnerService OwnerService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<PageTitle>Owners Management</PageTitle>
+
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="owner-title" style="font-weight: 800; color: #1e3932; margin-bottom: 0;">Owners</h1>
+            <p class="text-muted owner-subtitle mb-0">Manage property owners, their personal profiles, spouses, and locations.</p>
+        </div>
+        <div>
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog" Style="background-color: #1e3932; color: #ffffff; border-radius: 8px; font-weight: 600; padding: 10px 20px;">
+                Add Owner
+            </MudButton>
+        </div>
+    </div>
+
+    <!-- Quick Stats Metrics -->
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-4 d-flex justify-content-between align-items-center owner-table-panel" Style="border-left: 5px solid #1e3932;">
+                <div>
+                    <MudText Typo="Typo.subtitle2" Class="text-muted">Total Owners</MudText>
+                    <MudText Typo="Typo.h4" Style="font-weight: 700; color: #1e3932;">@totalOwnersCount</MudText>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Large" Style="color: #1e3932; opacity: 0.3;" />
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-4 d-flex justify-content-between align-items-center owner-table-panel" Style="border-left: 5px solid #4ade80;">
+                <div>
+                    <MudText Typo="Typo.subtitle2" Class="text-muted">Married Owners</MudText>
+                    <MudText Typo="Typo.h4" Style="font-weight: 700; color: #4ade80;">@marriedOwnersCount</MudText>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.Favorite" Size="Size.Large" Style="color: #4ade80; opacity: 0.3;" />
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-4 d-flex justify-content-between align-items-center owner-table-panel" Style="border-left: 5px solid #ffa726;">
+                <div>
+                    <MudText Typo="Typo.subtitle2" Class="text-muted">Single / Divorced</MudText>
+                    <MudText Typo="Typo.h4" Style="font-weight: 700; color: #ffa726;">@singleOwnersCount</MudText>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.PersonOutline" Size="Size.Large" Style="color: #ffa726; opacity: 0.3;" />
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Main Table Section -->
+    <MudPaper Class="owner-table-panel pa-4 mb-4">
+        <MudTable Items="@owners" Filter="new Func<Owner,bool>(FilterFunc1)" @bind-SelectedItem="selectedOwner" Class="owner-table" Hover="true" Bordered="false" Striped="false" Elevation="0">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6" Style="color: #1e3932; font-weight: 700;">Owners Register</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search by Name, Email, Phone, National ID..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="search-field" Immediate="true" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<Owner, object>(x=>x.Id)">ID</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Owner, object>(x=>x.FirstName)">Full Name</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Owner, object>(x=>x.sex)">Gender</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Owner, object>(x=>x.DateOfBirth)">Date of Birth</MudTableSortLabel></MudTh>
+                <MudTh>National ID</MudTh>
+                <MudTh>Contact Information</MudTh>
+                <MudTh>Marital Status</MudTh>
+                <MudTh>Location (Province/District)</MudTh>
+                <MudTh Style="text-align: right;">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="ID">@context.Id</MudTd>
+                <MudTd DataLabel="Full Name">
+                    <div class="owner-name" style="color: #1e3932;">@context.FirstName @context.LastName</div>
+                </MudTd>
+                <MudTd DataLabel="Gender">
+                    <MudChip T="string" Size="Size.Small" Color="@(context.sex == Sex.Male ? Color.Info : Color.Secondary)" Class="owner-chip">
+                        @context.sex.ToString()
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Date of Birth">@context.DateOfBirth.ToString("dd MMM yyyy")</MudTd>
+                <MudTd DataLabel="National ID">@context.IdentificationNumber</MudTd>
+                <MudTd DataLabel="Contact Information">
+                    <div style="font-size: 0.85rem;">
+                        <div>📞 @context.PhoneNumber</div>
+                        <div class="text-muted">✉️ @context.Email</div>
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Marital Status">
+                    <span style="font-weight: 500;">@context.Maritalstatus.ToString()</span>
+                </MudTd>
+                <MudTd DataLabel="Location">@context.Province / @context.District</MudTd>
+                <MudTd DataLabel="Actions" Style="text-align: right;" Class="owner-actions">
+                    <MudTooltip Text="View Details">
+                        <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenDetailsDialog(context))" />
+                    </MudTooltip>
+                    <MudTooltip Text="Edit Owner">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Info" OnClick="@(() => OpenEditDialog(context))" />
+                    </MudTooltip>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</div>
+
+@code {
+    private List<Owner> owners = new();
+    private Owner selectedOwner = new();
+    private string searchString = "";
+
+    // Stats
+    private int totalOwnersCount = 0;
+    private int marriedOwnersCount = 0;
+    private int singleOwnersCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOwnersAsync();
+    }
+
+    private async Task LoadOwnersAsync()
+    {
+        try
+        {
+            owners = await OwnerService.GetAllOwnersAsync() ?? new List<Owner>();
+            CalculateStats();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading owners: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void CalculateStats()
+    {
+        totalOwnersCount = owners.Count;
+        marriedOwnersCount = owners.Count(o => o.Maritalstatus == Maritalstatus.Married);
+        singleOwnersCount = totalOwnersCount - marriedOwnersCount;
+    }
+
+    private bool FilterFunc1(Owner owner) => FilterFunc(owner, searchString);
+
+    private bool FilterFunc(Owner owner, string search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+            return true;
+        if (owner.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (owner.LastName.Contains(search, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (owner.IdentificationNumber.Contains(search, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (owner.PhoneNumber.Contains(search, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (owner.Email.Contains(search, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async Task OpenAddDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<OwnerDialog>("Add New Owner", options);
+        var result = await dialog.Result;
+ 
+        if (result != null && !result.Canceled && result.Data is OwnerDialog.OwnerFormModel formModel)
+        {
+            try
+            {
+                var createDto = new CreateOwnerDTO
+                {
+                    FirstName = formModel.FirstName,
+                    LastName = formModel.LastName,
+                    sex = formModel.sex,
+                    DateOfBirth = formModel.DateOfBirth ?? DateTime.Now,
+                    IdentificationNumber = formModel.IdentificationNumber,
+                    Email = formModel.Email,
+                    PhoneNumber = formModel.PhoneNumber,
+                    Maritalstatus = formModel.Maritalstatus,
+                    SpouceIdNumber = formModel.SpouceIdNumber,
+                    SpouceName = formModel.SpouceName,
+                    NextOfKin = formModel.NextOfKin,
+                    KinPhoneNumber = formModel.KinPhoneNumber,
+                    Province = formModel.Province,
+                    District = formModel.District,
+                    Sector = formModel.Sector,
+                    Cell = formModel.Cell,
+                    Village = formModel.Village
+                };
+
+                await OwnerService.CreateOwner(createDto);
+                Snackbar.Add("Owner created successfully!", Severity.Success);
+                await LoadOwnersAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Failed to create owner: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OpenEditDialog(Owner owner)
+    {
+        var parameters = new DialogParameters<OwnerDialog> { { x => x.ExistingOwner, owner } };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<OwnerDialog>("Edit Owner", parameters, options);
+        var result = await dialog.Result;
+ 
+        if (result != null && !result.Canceled && result.Data is OwnerDialog.OwnerFormModel formModel)
+        {
+            try
+            {
+                var updateDto = new UpdateOwnerDTO
+                {
+                    FirstName = formModel.FirstName,
+                    LastName = formModel.LastName,
+                    sex = formModel.sex,
+                    DateOfBirth = formModel.DateOfBirth ?? DateTime.Now,
+                    Maritalstatus = formModel.Maritalstatus,
+                    SpouceIdNumber = formModel.SpouceIdNumber ?? "",
+                    SpouceName = formModel.SpouceName ?? ""
+                };
+
+                await OwnerService.UpdateOwner(owner.Id, updateDto);
+                Snackbar.Add("Owner updated successfully!", Severity.Success);
+                await LoadOwnersAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Failed to update owner: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OpenDetailsDialog(Owner owner)
+    {
+        var parameters = new DialogParameters<OwnerDetailsDialog> { { x => x.Owner, owner } };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        await DialogService.ShowAsync<OwnerDetailsDialog>("Owner Details", parameters, options);
+    }
+}

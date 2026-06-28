@@ -1,0 +1,237 @@
+@page "/Properties"
+@using Application.DTO
+@using Application.Interfaces
+
+@using Microsoft.AspNetCore.Authorization
+
+@inject IPropertyService PropertyService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<PageTitle>Properties Management</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6">
+    <MudCard>
+        <MudCardHeader>
+            <div class="d-flex justify-space-between align-center w-100">
+                <div>
+                    <MudText Typo="Typo.h5">Properties Management</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">View and manage all properties</MudText>
+                </div>
+                <div>
+                    <MudButton OnClick="OpenAddDialog" 
+                               Variant="Variant.Filled" 
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.AddHome">
+                        Add New Property
+                    </MudButton>
+                </div>
+            </div>
+        </MudCardHeader>
+
+        <MudCardContent>
+            @if (isLoading)
+            {
+                <div class="d-flex flex-column align-center justify-center pa-8">
+                    <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+                    <MudText Typo="Typo.body1" Class="mt-4">Loading properties...</MudText>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Error">
+                    @errorMessage
+                </MudAlert>
+            }
+            else if (properties == null || properties.Count == 0)
+            {
+                <MudAlert Severity="Severity.Info" Icon="@Icons.Material.Filled.Info">
+                    No properties found. Click "Add New Property" to create one.
+                </MudAlert>
+            }
+            else
+            {
+                <MudTable Items="@properties" 
+                          Hover="true" 
+                          Striped="true" 
+                          Dense="true"
+                          Filter="new Func<PropertyDetailDTO, bool>(FilterFunc)">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Properties</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="searchString" 
+                                      Placeholder="Search properties..." 
+                                      Adornment="Adornment.Start" 
+                                      AdornmentIcon="@Icons.Material.Filled.Search" 
+                                      IconSize="Size.Medium" 
+                                      Class="mt-0"
+                                      Immediate="true" />
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Parcel Number</MudTh>
+                        <MudTh>Location</MudTh>
+                        <MudTh>Land Size</MudTh>
+                        <MudTh>Use Type</MudTh>
+                        <MudTh>Status</MudTh>
+                        <MudTh>Value (RWF)</MudTh>
+                        <MudTh Style="text-align: right;">Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="ID">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">@context.Id</MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Parcel Number">
+                            <MudText Typo="Typo.body2"><strong>@context.ParcelNumber</strong></MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Location">
+                            <MudText Typo="Typo.body2">@context.PropertyLocation</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Land Size">
+                            <MudText Typo="Typo.body2">@context.LandSize</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Use Type">
+                            <MudText Typo="Typo.body2">@context.LandUseType</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Status">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">@context.PropertyStatus</MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Value">
+                            <MudText Typo="Typo.body2">@context.PropertyEstimatedValue.ToString("N0")</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Actions" Style="text-align: right;">
+                            <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+                                <MudIconButton Icon="@Icons.Material.Filled.Visibility" 
+                                               Color="Color.Info" 
+                                               Size="Size.Small"
+                                               Href="@($"/PropertyDetails/{context.Id}")"
+                                               Title="View Details" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                               Color="Color.Primary" 
+                                               Size="Size.Small"
+                                               OnClick="@(() => OpenEditDialog(context))"
+                                               Title="Edit Property" />
+                            </MudButtonGroup>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
+                    </PagerContent>
+                </MudTable>
+            }
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private List<PropertyDetailDTO>? properties;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private string searchString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProperties();
+    }
+
+    private async Task LoadProperties()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            properties = await PropertyService.GetAllPropertiesAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading properties: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private bool FilterFunc(PropertyDetailDTO property)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+
+        var search = searchString.ToLower();
+
+        if (property.ParcelNumber?.ToLower().Contains(search) == true) return true;
+        if (property.PropertyLocation?.ToLower().Contains(search) == true) return true;
+        if (property.PropertyStatus?.ToLower().Contains(search) == true) return true;
+
+        return false;
+    }
+
+    private async Task OpenAddDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = DialogService.Show<PropertyDialog>("Add New Property", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is PropertyDialog.DialogModel data)
+        {
+            var createDto = new PropertyCreateDTO
+            {
+                ParcelNumber = data.ParcelNumber,
+                LandSize = data.LandSize,
+                LandUseType = data.LandUseType,
+                PropertyStatus = data.PropertyStatus,
+                PropertyLocation = data.PropertyLocation,
+                PropertyDocuments = data.PropertyDocuments,
+                PropertyEstimatedValue = data.PropertyEstimatedValue,
+                PropertyDocumentType = data.PropertyDocumentType,
+                CreatedBy = "System" // Typically fetched from IUserContext
+            };
+
+            try
+            {
+                await PropertyService.CreatePropertyAsync(createDto);
+                Snackbar.Add("Property successfully created!", Severity.Success);
+                await LoadProperties();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OpenEditDialog(PropertyDetailDTO property)
+    {
+        var parameters = new DialogParameters { ["ExistingProperty"] = property };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = DialogService.Show<PropertyDialog>("Edit Property", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is PropertyDialog.DialogModel data)
+        {
+            var updateDto = new PropertyUpdateDTO
+            {
+                ParcelNumber = data.ParcelNumber,
+                LandSize = data.LandSize,
+                LandUseType = data.LandUseType,
+                PropertyStatus = data.PropertyStatus,
+                PropertyLocation = data.PropertyLocation,
+                PropertyDocuments = data.PropertyDocuments,
+                PropertyEstimatedValue = data.PropertyEstimatedValue,
+                PropertyDocumentType = data.PropertyDocumentType,
+                UpdatedBy = "System" // Typically fetched from IUserContext
+            };
+
+            try
+            {
+                await PropertyService.UpdatePropertyAsync(property.Id, updateDto);
+                Snackbar.Add("Property successfully updated!", Severity.Success);
+                await LoadProperties();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+}

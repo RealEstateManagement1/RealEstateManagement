@@ -1,0 +1,390 @@
+@using Domain.Entities
+@using Domain.ValueObjects
+@using Application.DTO
+@using Application.Interfaces
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
+@inject ILocationService LocationService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@(IsEditMode ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)" Color="Color.Primary" Style="color: #1e3932;" />
+            <MudText Typo="Typo.h5" Style="font-weight: 700; color: #1e3932;">@(IsEditMode ? "Edit Owner" : "Add Owner")</MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="@formModel" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <MudContainer Style="max-height: 65vh; overflow-y: auto;">
+                <MudGrid>
+                    <!-- Personal Details -->
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle2" Style="color: #1e3932; font-weight: 600;">Personal Information</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="First Name" @bind-Value="formModel.FirstName" For="@(() => formModel.FirstName)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="Last Name" @bind-Value="formModel.LastName" For="@(() => formModel.LastName)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="Sex" Label="Gender" @bind-Value="formModel.sex" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            @foreach (Sex sexVal in Enum.GetValues(typeof(Sex)))
+                            {
+                                <MudSelectItem Value="@sexVal">@sexVal.ToString()</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudDatePicker Label="Date of Birth" @bind-Date="formModel.DateOfBirth" For="@(() => formModel.DateOfBirth)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+
+                    @if (!IsEditMode)
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="National ID (Identification Number)" @bind-Value="formModel.IdentificationNumber" For="@(() => formModel.IdentificationNumber)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Email" @bind-Value="formModel.Email" For="@(() => formModel.Email)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Phone Number" @bind-Value="formModel.PhoneNumber" For="@(() => formModel.PhoneNumber)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                    }
+                    else
+                    {
+                        <!-- Show read-only for non-editable fields in Edit Mode -->
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="National ID (Identification Number)" Value="formModel.IdentificationNumber" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Email" Value="formModel.Email" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Phone Number" Value="formModel.PhoneNumber" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                    }
+
+                    <!-- Marital / Family Details -->
+                    <MudItem xs="12" Class="mt-2">
+                        <MudText Typo="Typo.subtitle2" Style="color: #1e3932; font-weight: 600;">Family Information</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="Maritalstatus" Label="Marital Status" @bind-Value="formModel.Maritalstatus" SelectedValuesChanged="OnMaritalStatusChanged" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            @foreach (Maritalstatus statusVal in Enum.GetValues(typeof(Maritalstatus)))
+                            {
+                                <MudSelectItem Value="@statusVal">@statusVal.ToString()</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    @if (formModel.Maritalstatus == Maritalstatus.Married)
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Spouse Name" @bind-Value="formModel.SpouceName" For="@(() => formModel.SpouceName)" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Spouse ID Number" @bind-Value="formModel.SpouceIdNumber" For="@(() => formModel.SpouceIdNumber)" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true" />
+                        </MudItem>
+                    }
+
+                    @if (!IsEditMode)
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Next of Kin Name" @bind-Value="formModel.NextOfKin" For="@(() => formModel.NextOfKin)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Kin Phone Number" @bind-Value="formModel.KinPhoneNumber" For="@(() => formModel.KinPhoneNumber)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+
+                        <!-- Location cascading dropdowns -->
+                        <MudItem xs="12" Class="mt-2">
+                            <MudText Typo="Typo.subtitle2" Style="color: #1e3932; font-weight: 600;">Address Location</MudText>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudSelect T="string" Label="Province" Value="formModel.Province" ValueChanged="OnProvinceChanged" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                @foreach (var p in provincesList)
+                                {
+                                    <MudSelectItem Value="@p">@p</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudSelect T="string" Label="District" Value="formModel.District" ValueChanged="OnDistrictChanged" Required="true" Disabled="@(string.IsNullOrEmpty(formModel.Province))" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                @foreach (var d in districtsList)
+                                {
+                                    <MudSelectItem Value="@d">@d</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudSelect T="string" Label="Sector" Value="formModel.Sector" ValueChanged="OnSectorChanged" Required="true" Disabled="@(string.IsNullOrEmpty(formModel.District))" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                @foreach (var s in sectorsList)
+                                {
+                                    <MudSelectItem Value="@s">@s</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudSelect T="string" Label="Cell" Value="formModel.Cell" ValueChanged="OnCellChanged" Required="true" Disabled="@(string.IsNullOrEmpty(formModel.Sector))" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                @foreach (var c in cellsList)
+                                {
+                                    <MudSelectItem Value="@c">@c</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudSelect T="string" Label="Village" @bind-Value="formModel.Village" Required="true" Disabled="@(string.IsNullOrEmpty(formModel.Cell))" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                @foreach (var v in villagesList)
+                                {
+                                    <MudSelectItem Value="@v">@v</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                    }
+                    else
+                    {
+                        <!-- Show read-only Address / Kin details in Edit Mode -->
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Next of Kin Name" Value="formModel.NextOfKin" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Kin Phone Number" Value="formModel.KinPhoneNumber" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" Class="mt-2">
+                            <MudText Typo="Typo.subtitle2" Style="color: #1e3932; font-weight: 600;">Address Location (Not Editable)</MudText>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField Label="Province" Value="formModel.Province" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField Label="District" Value="formModel.District" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField Label="Sector" Value="formModel.Sector" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Cell" Value="formModel.Cell" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Village" Value="formModel.Village" Disabled="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudContainer>
+            <div class="d-flex justify-end mt-4 px-4">
+                <MudButton OnClick="Cancel" Class="mr-2">Cancel</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Style="background-color: #1e3932; color: white;">Save Changes</MudButton>
+            </div>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public Owner? ExistingOwner { get; set; }
+
+    private bool IsEditMode => ExistingOwner != null;
+
+    private OwnerFormModel formModel = new();
+
+    // Location data holding lists
+    private List<Province> allLocations = new();
+    private List<string> provincesList = new();
+    private List<string> districtsList = new();
+    private List<string> sectorsList = new();
+    private List<string> cellsList = new();
+    private List<string> villagesList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEditMode && ExistingOwner != null)
+        {
+            formModel = new OwnerFormModel
+            {
+                FirstName = ExistingOwner.FirstName,
+                LastName = ExistingOwner.LastName,
+                sex = ExistingOwner.sex,
+                DateOfBirth = ExistingOwner.DateOfBirth,
+                IdentificationNumber = ExistingOwner.IdentificationNumber,
+                Email = ExistingOwner.Email,
+                PhoneNumber = ExistingOwner.PhoneNumber,
+                Maritalstatus = ExistingOwner.Maritalstatus,
+                SpouceIdNumber = ExistingOwner.SpouceIdNumber,
+                SpouceName = ExistingOwner.SpouceName,
+                NextOfKin = ExistingOwner.NextOfKin,
+                KinPhoneNumber = ExistingOwner.KinPhoneNumber,
+                Province = ExistingOwner.Province,
+                District = ExistingOwner.District,
+                Sector = ExistingOwner.Sector,
+                Cell = ExistingOwner.Cell,
+                Village = ExistingOwner.Village
+            };
+        }
+        else
+        {
+            // In Create mode, load locations from ILocationService
+            allLocations = await LocationService.GetAllLocationsAsync();
+            provincesList = allLocations.Select(p => p.Name).ToList();
+        }
+    }
+
+    private void OnMaritalStatusChanged()
+    {
+        if (formModel.Maritalstatus != Maritalstatus.Married)
+        {
+            formModel.SpouceName = null;
+            formModel.SpouceIdNumber = null;
+        }
+    }
+
+    private void OnProvinceChanged(string val)
+    {
+        formModel.Province = val;
+        formModel.District = string.Empty;
+        formModel.Sector = string.Empty;
+        formModel.Cell = string.Empty;
+        formModel.Village = string.Empty;
+
+        districtsList.Clear();
+        sectorsList.Clear();
+        cellsList.Clear();
+        villagesList.Clear();
+
+        var prov = allLocations.FirstOrDefault(p => p.Name == val);
+        if (prov != null)
+        {
+            districtsList = prov.Districts.Select(d => d.Name).ToList();
+        }
+    }
+
+    private void OnDistrictChanged(string val)
+    {
+        formModel.District = val;
+        formModel.Sector = string.Empty;
+        formModel.Cell = string.Empty;
+        formModel.Village = string.Empty;
+
+        sectorsList.Clear();
+        cellsList.Clear();
+        villagesList.Clear();
+
+        var prov = allLocations.FirstOrDefault(p => p.Name == formModel.Province);
+        var dist = prov?.Districts.FirstOrDefault(d => d.Name == val);
+        if (dist != null)
+        {
+            sectorsList = dist.Sectors.Select(s => s.Name).ToList();
+        }
+    }
+
+    private void OnSectorChanged(string val)
+    {
+        formModel.Sector = val;
+        formModel.Cell = string.Empty;
+        formModel.Village = string.Empty;
+
+        cellsList.Clear();
+        villagesList.Clear();
+
+        var prov = allLocations.FirstOrDefault(p => p.Name == formModel.Province);
+        var dist = prov?.Districts.FirstOrDefault(d => d.Name == formModel.District);
+        var sect = dist?.Sectors.FirstOrDefault(s => s.Name == val);
+        if (sect != null)
+        {
+            cellsList = sect.Cells.Select(c => c.Name).ToList();
+        }
+    }
+
+    private void OnCellChanged(string val)
+    {
+        formModel.Cell = val;
+        formModel.Village = string.Empty;
+
+        villagesList.Clear();
+
+        var prov = allLocations.FirstOrDefault(p => p.Name == formModel.Province);
+        var dist = prov?.Districts.FirstOrDefault(d => d.Name == formModel.District);
+        var sect = dist?.Sectors.FirstOrDefault(s => s.Name == formModel.Sector);
+        var cell = sect?.Cells.FirstOrDefault(c => c.Name == val);
+        if (cell != null)
+        {
+            villagesList = cell.Villages.Select(v => v.Name).ToList();
+        }
+    }
+
+    private void HandleSubmit()
+    {
+        // Custom marriage details check
+        if (formModel.Maritalstatus == Maritalstatus.Married)
+        {
+            if (string.IsNullOrWhiteSpace(formModel.SpouceName) || string.IsNullOrWhiteSpace(formModel.SpouceIdNumber))
+            {
+                Snackbar.Add("Spouse details are required when Married.", Severity.Error);
+                return;
+            }
+        }
+
+        MudDialog.Close(DialogResult.Ok(formModel));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    public class OwnerFormModel
+    {
+        [Required(ErrorMessage = "First Name is required.")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Last Name is required.")]
+        public string LastName { get; set; } = string.Empty;
+
+        public Sex sex { get; set; } = Sex.Female;
+
+        [Required(ErrorMessage = "Date of Birth is required.")]
+        public DateTime? DateOfBirth { get; set; } = DateTime.Today.AddYears(-30);
+
+        [Required(ErrorMessage = "Identification Number is required.")]
+        [RegularExpression(@"^\d+$", ErrorMessage = "IdentificationNumber must contain only digits.")]
+        [StringLength(16, ErrorMessage = "IdentificationNumber must not be more than 16 digits.")]
+        public string IdentificationNumber { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid Email Address.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Phone Number is required.")]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public Maritalstatus Maritalstatus { get; set; } = Maritalstatus.Single;
+
+        public string? SpouceIdNumber { get; set; }
+
+        public string? SpouceName { get; set; }
+
+        [Required(ErrorMessage = "Next of Kin Name is required.")]
+        public string NextOfKin { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Kin Phone Number is required.")]
+        public string KinPhoneNumber { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Province is required.")]
+        public string Province { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "District is required.")]
+        public string District { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Sector is required.")]
+        public string Sector { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Cell is required.")]
+        public string Cell { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Village is required.")]
+        public string Village { get; set; } = string.Empty;
+    }
+}

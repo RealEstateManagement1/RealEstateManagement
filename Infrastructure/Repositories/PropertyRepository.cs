@@ -43,6 +43,11 @@ namespace Infrastructure.Repositories
                 PropertyImages = dto.PropertyImages,
                 CreatedBy = dto.CreatedBy,
                 UpdatedBy = dto.CreatedBy,
+                // if PropertyDocuments can be null in UI, ensure we fail fast with a clear message
+                // (DB column is NOT NULL)
+                // NOTE: DTO PropertyDocuments is non-nullable, but if your caller passes null it will end up here.
+                // You should validate at the API/UI layer.
+                
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

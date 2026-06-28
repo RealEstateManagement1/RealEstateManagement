@@ -1,4 +1,4 @@
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 @using Application.Interfaces
 @using Infrastructure.Identity
 @using MudBlazor
@@ -152,27 +152,27 @@
                 @(_drawerOpen ? "Dashboard" : "")
             </MudNavLink>
 
-            <MudNavLink href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
+            @* <MudNavLink href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
                 @(_drawerOpen ? "Reports" : "")
             </MudNavLink>
 
             <MudNavLink href="/accounts" Icon="@Icons.Material.Outlined.ManageAccounts">
                 @(_drawerOpen ? "Account" : "")
-            </MudNavLink>
+            </MudNavLink> *@
 
              <MudNavLink href="/Properties" Icon="@Icons.Material.Outlined.Home">
                    @(_drawerOpen ? "Properties" : "")
              </MudNavLink>
 
-            <MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
+            @* <MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
                 @(_drawerOpen ? "LoanProducts" : "")
             </MudNavLink>
 
             <MudNavLink href="/Borrower" Icon="@Icons.Material.Outlined.People">
                 @(_drawerOpen ? "Borrowers" : "")
-            </MudNavLink>
+            </MudNavLink> *@
 
-            <MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
+            @* <MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
                 <MudNavLink href="/LoanApplication" Icon="@Icons.Material.Outlined.Assignment"> Loan Application</MudNavLink>
                 <MudNavLink href="/Guarantor" Icon="@Icons.Material.Outlined.GppGood">Guarantors</MudNavLink>
                 <MudNavLink href="/collateral" Icon="@Icons.Material.Outlined.Money">Collateral</MudNavLink>
@@ -197,7 +197,7 @@
 
             <MudNavLink href="/ProcessFeeDeposits" Icon="@Icons.Material.Outlined.Money">
                 @(_drawerOpen ? "Process Fee" : "")
-            </MudNavLink>
+            </MudNavLink> *@
 
             <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="false">
                 <MudNavLink Href="/Settings" Icon="@Icons.Material.Filled.Settings">Settings</MudNavLink>

@@ -56,6 +56,7 @@ namespace Application.Services.Properties
                 PropertyStatus = property.PropertyStatus,
                 PropertyLocation = property.PropertyLocation,
                 PropertyDocuments = property.PropertyDocuments,
+
                 PropertyEstimatedValue = property.PropertyEstimatedValue,
                 PropertyDocumentType = property.PropertyDocumentType,
                 PropertyImages = property.PropertyImages,

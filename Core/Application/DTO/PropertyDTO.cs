@@ -9,7 +9,7 @@ namespace Application.DTO
         public string LandUseType { get; set; }
         public string PropertyStatus { get; set; }
         public string PropertyLocation { get; set; }
-        public string PropertyDocuments { get; set; }
+        public string? PropertyDocuments { get; set; }
         public decimal PropertyEstimatedValue { get; set; }
         public string PropertyDocumentType { get; set; }
         public string CreatedBy { get; set; }
@@ -23,7 +23,7 @@ namespace Application.DTO
         public string LandUseType { get; set; }
         public string PropertyStatus { get; set; }
         public string PropertyLocation { get; set; }
-        public string PropertyDocuments { get; set; }
+        public string? PropertyDocuments { get; set; }
         public decimal PropertyEstimatedValue { get; set; }
         public string PropertyDocumentType { get; set; }
         public string UpdatedBy { get; set; }
@@ -38,7 +38,7 @@ namespace Application.DTO
         public string LandUseType { get; set; }
         public string PropertyStatus { get; set; }
         public string PropertyLocation { get; set; }
-        public string PropertyDocuments { get; set; }
+        public string? PropertyDocuments { get; set; }
         public decimal PropertyEstimatedValue { get; set; }
         public string PropertyDocumentType { get; set; }
         public DateTime CreatedAt { get; set; }

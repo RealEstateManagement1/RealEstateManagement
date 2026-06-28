@@ -39,11 +39,11 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudSelect @bind-Value="Model.PropertyStatus" Label="Property Status" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense">
-                        <MudSelectItem Value="Forsale">For sale</MudSelectItem>
-                        <MudSelectItem Value="ForRent">For Rent</MudSelectItem>
-                        <MudSelectItem Value="Soldout">Sold out</MudSelectItem>
-                    </MudSelect>
+                        <MudSelect @bind-Value="Model.PropertyStatus" Label="Property Status" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="@("ForSale")">For sale</MudSelectItem>
+                            <MudSelectItem Value="@("ForRent")">For Rent</MudSelectItem>
+                            <MudSelectItem Value="@("SoldOut")">Sold out</MudSelectItem>
+                        </MudSelect>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField @bind-Value="Model.PropertyLocation" Label="Property Location" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />

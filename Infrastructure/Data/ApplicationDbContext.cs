@@ -1,39 +1,36 @@
-using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Infrastructure.Identity;
-
-using System.Linq;
-using Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
-   public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        public DbSet<Person> Persons { get; set; }
-        public DbSet<User> ApplicationUsers { get; set; }
-        public DbSet<Property> Properties { get; set; }
-        protected override void OnModelCreating(ModelBuilder Builder)
-        {
-            base.OnModelCreating(Builder);
+        public DbSet<LandTitle> LandTitles { get; set; }
+        public DbSet<Document> Documents { get; set; }
 
-            // customize Identity tables
-                Builder.Entity<User>().ToTable("AspNetUsers");
-                Builder.Entity<Person>().ToTable("Persons");
-                Builder.Entity<IdentityRole<int>>().ToTable("Roles");
-                Builder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
-                Builder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
-                Builder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
-                Builder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
-                Builder.Entity<IdentityUserRole<int>>().ToTable("UserRoles").HasKey(ur => new { ur.UserId, ur.RoleId });
-              
-               
-                
-}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<LandTitle>(eb =>
+            {
+                eb.HasKey(x => x.Id);
+                eb.Property(x => x.TitleNumber).IsRequired();
+            });
+
+            modelBuilder.Entity<Document>(eb =>
+            {
+                eb.HasKey(x => x.Id);
+                eb.Property(x => x.FileName).IsRequired();
+                eb.HasOne(d => d.LandTitle)
+                    .WithMany()
+                    .HasForeignKey(d => d.LandTitleId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+        }
     }
 }

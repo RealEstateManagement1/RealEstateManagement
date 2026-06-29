@@ -1,5 +1,16 @@
-.page {
-    position: relative;
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fffaf0 0%, #f5f9f3 100%);
+}
+
+.nav-aside {
+    width: 280px;
+    background: #16a34a;
+    color: #f8fafc;
+    padding: 2rem 1.5rem;
+    position: sticky;
+    top: 0;
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -54,10 +65,9 @@
         color: #0f2818;
     }
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+.nav-aside ::deep .mud-nav-menu .mud-nav-link {
+    border-radius: 0.85rem;
+}
 
 @media (max-width: 640.98px) {
     .page {
@@ -92,10 +102,11 @@ article {
     min-height: calc(100vh - 7rem);
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
+.nav-brand p {
+    margin: 0.4rem 0 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.95rem;
+}
 
     .sidebar {
         width: 260px;
@@ -110,8 +121,9 @@ article {
         flex: 1;
     }
 
-    .top-row {
-        position: sticky;
+    .nav-aside {
+        width: 100%;
+        position: relative;
         top: 0;
         z-index: 1000;
     }
@@ -128,23 +140,3 @@ article {
     }
 }
 
-#blazor-error-ui {
-    color-scheme: light only;
-    background: lightyellow;
-    bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
-    position: fixed;
-    width: 100%;
-    z-index: 1000;
-}
-
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }

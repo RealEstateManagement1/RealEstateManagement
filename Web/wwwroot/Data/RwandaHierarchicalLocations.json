@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Kigali",
+    "districts": [
+      {
+        "name": "Kicukiro",
+        "sectors": [
+          {
+            "name": "Kimisagara",
+            "cells": [
+              {
+                "name": "Amahoro",
+                "villages": [
+                  { "name": "Ingara" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Gasabo",
+        "sectors": [
+          {
+            "name": "Ndera",
+            "cells": [
+              {
+                "name": "Mwenge",
+                "villages": [
+                  { "name": "Kabeza" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Southern",
+    "districts": [
+      {
+        "name": "Nyaruguru",
+        "sectors": [
+          {
+            "name": "Nyaruguru",
+            "cells": [
+              {
+                "name": "Cyigaba",
+                "villages": [
+                  { "name": "Kibuye" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Western",
+    "districts": [
+      {
+        "name": "Rusizi",
+        "sectors": [
+          {
+            "name": "Rusizi",
+            "cells": [
+              {
+                "name": "Nyamasheke",
+                "villages": [
+                  { "name": "Gitaza" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Northern",
+    "districts": [
+      {
+        "name": "Gakenke",
+        "sectors": [
+          {
+            "name": "Gakenke",
+            "cells": [
+              {
+                "name": "Busenyi",
+                "villages": [
+                  { "name": "Muringa" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

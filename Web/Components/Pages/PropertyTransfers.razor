@@ -1,0 +1,151 @@
+@page "/propertyTransfers"
+@using Application.Interfaces
+@using MudBlazor
+@using Domain.Entities
+@using Application.Services.PropertyTransfers
+
+
+@inject IPropertyTransferService PropertyTransferService
+
+@inject IDialogService DialogService
+
+<PageTitle>PropertyTransfers</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    @* 1. TOP TITLE AND SEARCH BAR *@
+    <div class="d-flex align-center justify-space-between mb-6">
+        <MudText Typo="Typo.h5" Style="font-weight: 800; color: #247423;">PropertyTransfers</MudText>
+        @* <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Style="text-transform:none;">
+            Add PropertyTransfer
+        </MudButton> *@
+    </div>
+
+    @* 2. SEARCH AND FILTER ROW *@
+    <MudGrid Class="mb-4" Spacing="2">
+        @* <MudItem xs="12" sm="4">
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Variant="Variant.Outlined" 
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+                          Margin="Margin.Dense" Class="bg-white rounded-lg" />
+        </MudItem> *@
+        <MudItem xs="12" sm="8" Class="d-flex align-center justify-end gap-4">
+            @if (_selectedItems.Any())
+            {
+               <MudText Style="color: #d46b24;" Typo="Typo.subtitle2">@_selectedItems.Count Selected</MudText>
+                @* <MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => OpenDetailDialog(_selectedItems.First().Id))" /> *@
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+                <MudDivider Vertical="true" FlexItem="true" Class="mx-2" />
+            }
+            <MudButton StartIcon="@Icons.Material.Filled.FilterList" Variant="Variant.Text">Filter</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Sort" Variant="Variant.Text">Sort by</MudButton>
+            @* <MudSelect T="string" Label="FirstName" Dense="true" Margin="Margin.Dense" Outlined="true" Style="width: 150px; background: white;">
+                <MudSelectItem Value="@("All")" />
+            </MudSelect> *@
+        </MudItem>
+    </MudGrid>
+
+    @* 3. THE DATAGRID *@
+    <MudDataGrid T="PropertyTransfer" Items="@_propertyTransfers" MultiSelection="true" @bind-SelectedItems="_selectedItems"
+                 Hover="true" Elevation="0" Class="rounded-xl border-none">
+
+                  <ToolBarContent>
+            <MudText Typo="Typo.h5" Style="color: #1B5E20;">PropertyTransfer</MudText>
+            <MudSpacer />
+
+            <MudMenu Label="Add PropertyTransfer"
+            Variant="Variant.Filled"
+            EndIcon="@Icons.Material.Filled.KeyboardArrowDown"
+            Style="background-color: #1B5E20; color: white;">
+
+                <MudMenuItem Icon="@Icons.Material.Filled.Add" OnClick="OpenDialog">
+                    Single
+                </MudMenuItem>
+            </MudMenu>
+
+                <MudMenuItem Icon="@Icons.Material.Filled.ImportExport">
+                    print
+                </MudMenuItem>
+
+            @* </MudMenu> *@
+        </ToolBarContent>
+
+          <ToolBarContent>
+            <MudText Typo="Typo.h5"  Style="color: #e0e7e0;">PropertyTransfer</MudText>
+            <MudSpacer />
+            <MudMenu Label="Add PropertyTransfer" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Style="background-color: #D35400; color: #FFFFFF; font-weight: bold;">>
+                <MudMenuItem Icon="@Icons.Material.Filled.Add" OnClick="@(() => OpenDialog())">Single</MudMenuItem>
+                <MudMenuItem Icon="@Icons.Material.Filled.ImportExport">print</MudMenuItem>
+            </MudMenu>
+        </ToolBarContent>
+
+        <Columns>
+            <SelectColumn T="PropertyTransfer" />
+            <HierarchyColumn T="PropertyTransfer" />
+            <PropertyColumn Property="x => x.Id" Title="ID" />
+            <TemplateColumn>
+                <CellTemplate>
+                    @* <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudAvatar Size="Size.Small"><MudImage Src="@context.Item.AvatarUrl" /></MudAvatar>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">@context.Item.FirstName</MudText>
+                    </MudStack> *@
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.PropertyId" Title="PropertyId" />
+           
+            @* <PropertyColumn Property="x => x.AccountType.AccountTypeName" Title="AccountType" /> *@
+             <PropertyColumn Property="x => x.SellerId" Title="SellerId" />
+              <PropertyColumn Property="x => x.BuyerId" Title="BuyerId" />
+              <PropertyColumn Property="x => x.TransferType" Title="TransferType" />
+              <PropertyColumn Property="x => x.TransferDate" Title="TransferDate" />
+              <PropertyColumn Property="x => x.Amount" Title="Amount" />
+              
+          </Columns>
+           
+      
+        <PagerContent>
+            <MudDataGridPager T="PropertyTransfer" />
+        </PagerContent>
+    </MudDataGrid>
+</MudContainer>
+
+@code {
+     private string _searchString = "";
+
+       List<PropertyTransfer> _propertyTransfers = new();
+
+           private HashSet<PropertyTransfer> _selectedItems = new();
+
+      protected override async Task OnInitializedAsync()
+    {
+         await LoadPropertyTransfer();
+         
+    }
+    
+    private async Task OpenDialog()
+    {
+        DialogOptions options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        var dialog = await DialogService.ShowAsync<PropertyTransferDialog>("Add PropertyTransfer", options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+          
+             await LoadPropertyTransfer();
+        }
+    }
+     private async Task LoadPropertyTransfer()
+    {
+        _propertyTransfers = await PropertyTransferService.GetAllPropertyTransfersAsync();
+        StateHasChanged();
+    }
+       @* private async Task OpenDetailDialog(int id)
+    {
+        var parameters = new DialogParameters<DisputeDetailDialog> { { x => x.Id, id } };
+        await DialogService.ShowAsync<DisputeDetailDialog>("View Details", parameters);
+    } *@
+
+
+
+
+}

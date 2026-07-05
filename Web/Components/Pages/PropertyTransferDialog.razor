@@ -1,0 +1,205 @@
+@using  Application.DTO
+@using System.ComponentModel.DataAnnotations
+@using Application.Interfaces
+@using Application.Services.PropertyTransfers
+@using Domain.Entities
+@using MudBlazor
+@using MudBlazor.Services
+@using Microsoft.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using Microsoft.AspNetCore.Authorization
+@* @attribute [Authorize] *@
+@inject NavigationManager Navigation
+@inject IPropertyTransferService PropertyTransferService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+
+<MudDialog Style="overflow:hidden;" >
+
+    <DialogContent>
+
+        <!-- ══════════ HEADER BANNER ══════════ -->
+        <MudPaper Elevation="0"
+                  Style="background: linear-gradient(135deg, #056d1da7 );
+                         padding:14px 18px; margin-bottom:16px;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+
+                <MudIcon Icon="@Icons.Material.Filled.AccountBalance"
+                         Style="color:white; font-size:1.6rem;" />
+
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.subtitle1"
+                             Style="color:white; font-weight:700; line-height:1.2;">
+                        Create PropertyTransfers
+                    </MudText>
+
+                    <MudText Typo="Typo.caption" Style="color:rgba(255,255,255,0.80);">
+                        Fill the form below to create a new PropertyTransfers
+                    </MudText>
+                </MudStack>
+
+            </MudStack>
+        </MudPaper>
+
+
+        <!-- ══════════ FORM ══════════ -->
+        <EditForm Model="Model" OnValidSubmit="onValidSubmit" FormName="CreatePropertyTransfersForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            @* <MudStack Spacing="2"> *@
+
+                <!-- Section -->
+                @* <MudText Typo="Typo.caption"
+                         Style="color:#9E9E9E; font-weight:600; letter-spacing:.08em;
+                                text-transform:uppercase;">
+                    Disputes Type
+                </MudText> *@
+                <MudGrid Spacing="1" Class="align-items-center">
+                    
+                <MudItem  xs="6">
+                <MudTextField Label="PropertyId"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Style="color: #1B5E20; --mud-palette-primary: #1B5E20; --mud-palette-text-primary: #1B5E20;"
+                              @bind-Value="Model.PropertyId"
+                              For="@(() => Model.PropertyId)" />
+                </MudItem>
+                <MudItem  xs="6">
+                <MudTextField Label="SellerId"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Style="color: #1B5E20; --mud-palette-primary: #1B5E20; --mud-palette-text-primary: #1B5E20;"
+                              @bind-Value="Model.SellerId"
+                              For="@(() => Model.SellerId)" />
+                </MudItem>
+                <MudItem  xs="6">
+                <MudTextField Label="TransferDate"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Style="color: #1B5E20; --mud-palette-primary: #1B5E20; --mud-palette-text-primary: #1B5E20;"
+                              @bind-Value="Model.TransferDate"
+                              For="@(() => Model.TransferDate)" />
+                </MudItem>
+                @* <MudItem  xs="6">
+                <MudSelect T="int" 
+                             Label="AccountType"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Placeholder="--Select Account Type"
+                              AdornmentIcon="@Icons.Material.Filled.Category"
+                                AdornmentColor="Color.Primary"
+                              @bind-Value="Model.AccountTypeId">
+
+                              <MudSelectItem Value="0">--Select Account Type--</MudSelectItem>
+                              @if (_accountTypes != null)
+                              {
+                                foreach(var types in _accountTypes)
+                                {
+                                    <MudSelectItem T="int" Value="@types.Id">@types.AccountTypeName</MudSelectItem>
+                                }
+                              }
+                </MudSelect>     
+                </MudItem> *@
+                <MudItem  xs="6">
+                <MudTextField Label="BuyerId"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"Style="color: #1B5E20; --mud-palette-primary: #1B5E20; --mud-palette-text-primary: #1B5E20;"
+
+                              @bind-Value="Model.BuyerId"
+                              For="@(() => Model.BuyerId)" />
+                </MudItem>
+                <MudItem  xs="6">
+                <MudTextField Label="TransferType"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Style="color: #1B5E20; --mud-palette-primary: #1B5E20; --mud-palette-text-primary: #1B5E20;"
+                              @bind-Value="Model.TransferType"
+                              For="@(() => Model.TransferType)" />
+                </MudItem>
+                
+
+                
+                        @* <MudItem xs="12">
+    <MudSelect T="Maritalstatus"
+               Label="Maritalstatus"
+               @bind-Value="Model.Maritalstatus"
+               Variant="Variant.Outlined"
+               Dense="true"
+               Margin="Margin.Dense"
+               AdornmentIcon="@Icons.Material.Filled.Transgender"
+               AdornmentColor="Color.Primary">
+        
+        <MudSelectItem T="Maritalstatus" Disabled="true">-- Select Maritalstatus --</MudSelectItem>
+
+        @foreach (Maritalstatus item in Enum.GetValues(typeof(Maritalstatus)))
+        {
+            <MudSelectItem T="Maritalstatus" Value="item">@item.ToString()</MudSelectItem>
+        }
+    </MudSelect>
+</MudItem> *@
+
+                 
+               <MudItem xs="12">
+               <MudButton Variant="Variant.Filled"
+               Size="Size.Small"
+               FullWidth="true"
+               ButtonType="ButtonType.Submit"
+               Style="height: 40px; font-weight: bold; margin-top:5px; margin-bottom:5px; background-color: #D35400; color: white;">
+                    Add PropertyTransfers
+               </MudButton>
+</MudItem>
+
+
+
+            </MudGrid>
+
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code{
+    [CascadingParameter]
+    
+    private IMudDialogInstance MudDialog { get; set; }
+    private bool _fullWidth;
+    private bool _fitContent;
+    [SupplyParameterFromForm(Name = "CreatePropertyTransfersForm")]
+    private PropertyTransferCreateDTO Model { get; set; } = new();
+    private string ErrorMessage { get; set; }
+    @* private List<AccountType> _accountTypes = new ();
+
+      protected override async Task OnInitializedAsync()
+      {
+          try
+          {
+               var types = await AccountTypeService.GetAllAccountTypesAsync();
+               if (types != null)
+               {
+                _accountTypes=types;
+                StateHasChanged();
+               }
+          }
+    catch (Exception ex)
+    {
+        Snackbar.Add("Error Loading Account Types",Severity.Error);
+    }
+      } *@
+    private async Task onValidSubmit()
+    {
+        try
+        {
+            await PropertyTransferService.CreatePropertyTransferAsync(Model);
+            Snackbar.Add("PropertyTransfers created successfully!", Severity.Info);
+            MudDialog.Close(DialogResult.Ok(Model));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+   
+    
+
+}

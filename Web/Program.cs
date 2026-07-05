@@ -10,9 +10,13 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 using Infrastructure.Data;
 using Infrastructure.Identity;
+using Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Application.Interfaces;
+using Application.Services.Disputes;
+using Application.Services.Surveys;
+using Application.Services.PropertyTransfers;
 using Application.Services.Users;
 using Application.Services.Properties;
 using Infrastructure.Repositories;
@@ -20,18 +24,14 @@ using MudBlazor.Services;
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
 using Web.Services;
+using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. SERVICES REGISTRATION ---
 
-// Register infrastructure services (includes DbContext)
+// Register infrastructure services (includes DbContext, authentication, and identity)
 builder.Services.AddInfrastructureServices(builder.Configuration);
-
-// Identity configuration
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
 
 // Core Services
 builder.Services.AddMudServices();
@@ -41,54 +41,20 @@ builder.Services.AddControllers(); // Moved up from the bottom
 builder.Services.AddAuthorization(); // Moved up from the bottom
 
 // Business Services
-// (IOwnerService is registered by AddInfrastructureServices)
+builder.Services.AddScoped<IDisputeService, DisputeService>();
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+builder.Services.AddScoped<IPropertyTransferService, PropertyTransferService>();
+
 // File/Location Services
-builder.Services.AddSingleton<IFileProvider>(builder.Environment.WebRootFileProvider);
-builder.Services.AddSingleton<ILocationService, JsonLocationService>();
-
-// Add MudBlazor services
-builder.Services.AddMudServices();
-
-// Add Language Service (Singleton for app-wide use)
-builder.Services.AddSingleton<LanguageService>();
-
-// Configure Entity Framework Core
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
-// Add Identity services
-builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireDigit = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequiredLength = 6;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
-
-// Add authentication and authorization
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
-// Register application services
-builder.Services.AddScoped<IIdentity, IdentityRepository>();
-builder.Services.AddScoped<IIdentityService, IdentityService>();
-builder.Services.AddScoped<IProperty, PropertyRepository>();
-builder.Services.AddScoped<IPropertyService, PropertyService>();
-builder.Services.AddScoped<IUserContext, UserContext>();
-builder.Services.AddHttpContextAccessor();
+// builder.Services.AddSingleton<IFileProvider>(builder.Environment.WebRootFileProvider);
+// builder.Services.AddSingleton<ILocationService, JsonLocationService>();
 
 builder.Services.AddMudServices();
 
 // Infrastructure services: DbContext, repositories, LandTitleService, DocumentService
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// --- 2. BUILD THE APP ---
 var app = builder.Build();
 
 // Ensure the database is created and migrations are applied

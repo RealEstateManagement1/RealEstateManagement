@@ -1,0 +1,73 @@
+@page "/propertyTransfers/create"
+@rendermode InteractiveServer
+
+@using Application.DTO
+@using System.ComponentModel.DataAnnotations
+@using Application.Interfaces
+@using Domain.Entities
+@using Application.Services.PropertyTransfers
+@using MudBlazor
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@inject NavigationManager Navigation
+@inject IPropertyTransferService PropertyTransferService
+
+<PageTitle>Create PropertyTransfer</PageTitle>
+
+<div class="container">
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Create PropertyTransfer</h3>
+            <a href="/propertyTransfers" class="btn btn-outline-secondary btn-sm">Back to List</a>
+    </div>
+
+       <div class="card">
+                    <div class="card-body">
+                        <EditForm Model="Model" OnValidSubmit="onValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger py-2 mb-3" />
+
+                        <MudStack Spacing="2">
+                            <MudTextField Label="PropertyId" @bind-Value="Model.PropertyId" For="@(() => Model.PropertyId)" />
+                               @* <MudItem xs="12" sm="6">
+                    <MudSelect T="int" Label="Account type" @bind-Value="Model.AccountTypeId"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                               AdornmentIcon="@Icons.Material.Filled.Category" Adornment="Adornment.Start"
+                               AdornmentColor="Color.Primary">
+                        <MudSelectItem Value="0">Select Account Type</MudSelectItem>
+                        @foreach (var account in AccountTypes)
+                        {
+                            <MudSelectItem Value="@account.Id">@account.AccountTypeName</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem> *@
+                            
+                            <MudTextField Label="SellerId" @bind-Value="Model.SellerId" For="@(() => Model.SellerId)" />
+                            <MudTextField Label="BuyerId" @bind-Value="Model.BuyerId" For="@(() => Model.BuyerId)" />
+                            <MudTextField Label="TransferType" @bind-Value="Model.TransferType" For="@(() => Model.TransferType)" />
+                            <MudTextField Label="TransferDate" @bind-Value="Model.TransferDate" For="@(() => Model.TransferDate)" />
+                            <MudTextField Label="Amount" @bind-Value="Model.Amount" For="@(() => Model.Amount)" />
+                            <MudButton Variant="Variant.Filled" 
+                            ButtonType="ButtonType.Submit" 
+                            Style="background-color: #D35400; color: #FFFFFF; font-weight: bold;">
+                            Add PropertyTransfer
+                          </MudButton>
+                        </MudStack>
+                       </EditForm>
+                    </div>
+        </div>
+    </div>
+</div>
+</div>
+@code {
+    
+    private PropertyTransferCreateDTO Model { get; set; } = new();
+
+    @* private List<AccountType> AccountTypes = new(); *@
+    
+    private async Task onValidSubmit()
+    {
+        await PropertyTransferService.CreatePropertyTransferAsync(Model);
+        Navigation.NavigateTo("/propertyTransfers");
+    }
+}

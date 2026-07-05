@@ -1,0 +1,84 @@
+@page "/documents"
+@rendermode InteractiveServer
+@using Infrastructure.Repository.Interfaces
+@using Infrastructure.Services
+@using Domain.Entities
+@inject IDocumentRepository DocumentRepository
+@inject DocumentService DocumentService
+
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Documents</p>
+        <h1>Documents</h1>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-brand btn-brand-lg" @onclick="OpenUpload">+ Upload Document</button>
+    </div>
+</div>
+
+@if (showDialog)
+{
+    <div class="form-panel mb-4">
+        <DocumentDialog OnUploaded="OnUploaded" OnCancel="() => showDialog = false" />
+    </div>
+}
+
+<div class="card-panel">
+    @if (documents is null || !documents.Any())
+    {
+        <div class="alert alert-soft">No documents uploaded yet.</div>
+    }
+    else
+    {
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Type</th>
+                    <th>Property ID</th>
+                    <th>Uploaded</th>
+                    <th>Size</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in documents)
+                {
+                    <tr>
+                        <td>@d.FileName</td>
+                        <td>@d.DocumentType</td>
+                        <td>@d.PropertyId</td>
+                        <td>@d.UploadedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@(d.Size / 1024) KB</td>
+                        <td>
+                            <a class="btn btn-outline-black btn-sm" href="@d.FilePath" target="_blank">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private bool showDialog;
+    private List<Document> documents = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var list = await DocumentRepository.GetAllAsync();
+        documents = list.ToList();
+    }
+
+    private void OpenUpload()
+    {
+        showDialog = true;
+    }
+
+    private async Task OnUploaded(Document doc)
+    {
+        showDialog = false;
+        documents.Insert(0, doc);
+        StateHasChanged();
+    }
+}

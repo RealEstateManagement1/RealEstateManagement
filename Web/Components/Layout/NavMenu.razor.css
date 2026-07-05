@@ -26,6 +26,46 @@
     position: absolute;
     top: 0.5rem;
     right: 1rem;
+    border: 1px solid #16a34a;
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem #16a34a;
+}
+
+.nav-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    background-color: #111111;
+    border-bottom: 2px solid #2e7d32;
+}
+
+.nav-brand h2 {
+    color: #ffffff;
+    font-size: 0.85rem;
+    text-align: center;
+    margin: 6px 0 0 0;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-logo {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+}
+
+.sidebar-logo img {
+    width: 180px;
+    height: auto;
+    display: block;
+}
+
+.navbar-toggler:checked {
+    background-color: lab(86.96% -84.08 82.46 / 0.993);
+}
+
+.top-row {
+    min-height: 3.5rem;
+    background-color: #f59c18;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem rgba(255, 255, 255, 0.1);
     border-radius: 4px;
@@ -96,6 +136,14 @@
     font-size: 1rem;
 }
 
+.nav-item ::deep a.active {
+    background-color: rgba(245, 156, 24, 0.945);
+    color: white;
+}
+
+.nav-item ::deep .nav-link:hover {
+    background-color: rgba(245, 156, 24, 0.856);
+    color: white;
 .nav-text {
     flex: 1;
 }
@@ -126,6 +174,8 @@
     }
 
     .nav-scrollable {
+        display: block;
+        height: calc(100vh - 3.5rem);
         /* Never collapse the sidebar for wide screens */
         display: block !important;
 

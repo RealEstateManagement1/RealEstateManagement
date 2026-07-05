@@ -1,3 +1,28 @@
+﻿
+﻿<div class="nav-brand">
+    <div class="sidebar-logo">
+        <img src="images/duture-neza-logo.png"/>
+    </div>
+    <h2>Real Estate Management</h2>
+</div>
+
+<nav class="nav flex-column">
+    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+        <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
+    </NavLink>
+
+    <NavLink class="nav-link" href="landtitles">
+        <span class="bi bi-pin-map-fill" aria-hidden="true"></span> Land Titles
+    </NavLink>
+
+    <NavLink class="nav-link" href="documents">
+        <span class="bi bi-file-earmark-text" aria-hidden="true"></span> Documents
+    </NavLink>
+
+    <NavLink class="nav-link" href="weather">
+        <span class="bi bi-cloud-sun-fill" aria-hidden="true"></span> Weather
+    </NavLink>
+</nav>
 
 <style>
     .mud-nav-link.active {
@@ -16,19 +41,20 @@
 @code {
     [Parameter] public bool IsMini { get; set; }
 }
+﻿@using MudBlazor
 
 <MudNavMenu>
-    <MudNavLink href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard">
+    <MudNavLink Href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard">
         @(!IsMini ? "Dashboard" : "")
     </MudNavLink>
 
-    <MudNavLink Href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
+    @* <MudNavLink Href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
         @(!IsMini ? "Reports" : "")
     </MudNavLink>
 
      <MudNavLink href="/accounts" Icon="@Icons.Material.Outlined.ManageAccounts">
         @(!IsMini ? "Account" : "")
-    </MudNavLink>
+    </MudNavLink> *@
     
     <MudNavLink href="/Properties" Icon="@Icons.Material.Outlined.Home">
         @(!IsMini ? "Properties" : "")
@@ -38,13 +64,13 @@
         @(!IsMini ? "My Loans" : "")
     </MudNavLink> *@
 
-<MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
+@* <MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
         @(!IsMini ? "LoanProducts" : "")
     </MudNavLink>
 
     <MudNavLink href="/Borrower" Icon="@Icons.Material.Outlined.People">
         @(!IsMini ? "Borrowers" : "")
-    </MudNavLink>
+    </MudNavLink> *@
 
     @* <MudNavLink href="/ProvidedDocuments" Icon="@Icons.Material.Outlined.Description">
         @(!IsMini ? "Documents" : "")
@@ -53,7 +79,7 @@
         @(!IsMini ? "Application" : "")
     </MudNavLink> *@
 
-<MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
+@* <MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
     <MudNavLink href="/LoanApplication" Icon="@Icons.Material.Outlined.Assignment">
         @(!IsMini ? "Application" : "")
     </MudNavLink>
@@ -67,36 +93,36 @@
         @(!IsMini ? "Documents" : "")
 </MudNavLink>
 
-</MudNavGroup>
+</MudNavGroup> *@
 
     @* <MudNavLink href="/Guarantor" Icon="@Icons.Material.Outlined.GppGood">
         @(!IsMini ? "Guarantors" : "")
     </MudNavLink> *@
      
 
-     <MudNavLink href="/Disbursements" Icon="@Icons.Material.Outlined.Money">
+     @* <MudNavLink href="/Disbursements" Icon="@Icons.Material.Outlined.Money">
         @(!IsMini ? "Disbursement" : "")
-    </MudNavLink>
+    </MudNavLink> *@
 
      @* <MudNavLink href="/collateral" Icon="@Icons.Material.Outlined.Money">
         @(!IsMini ? "Collateral" : "")
     </MudNavLink>   *@
 
-     <MudNavLink href="/Payments" Icon="@Icons.Material.Outlined.Money">
+     @* <MudNavLink href="/Payments" Icon="@Icons.Material.Outlined.Money">
         @(!IsMini ? "Payments" : "")
     </MudNavLink>
 
      <MudNavLink href="/Penality" Icon="@Icons.Material.Outlined.Money">
         @(!IsMini ? "Penality" : "")
-    </MudNavLink>
+    </MudNavLink> *@
 
-    <MudNavLink href="/waivers" Icon="@Icons.Material.Outlined.GppGood">
+    @* <MudNavLink href="/waivers" Icon="@Icons.Material.Outlined.GppGood">
         @(!IsMini ? "Waivers" : "")
     </MudNavLink>
 
     <MudNavLink href="/ProcessFeeDeposits" Icon="@Icons.Material.Outlined.Money">
         @(!IsMini ? "Process Fee Deposits" : "")
-    </MudNavLink>
+    </MudNavLink> *@
 
 <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="false">
     <MudNavLink Href="/Settings" Icon="@Icons.Material.Filled.Settings">
@@ -107,3 +133,19 @@
     </MudNavLink>
 </MudNavGroup>
 </MudNavMenu>
+    <MudNavLink Href="/disputes" Icon="@Icons.Material.Outlined.ManageAccounts">
+        @(!IsMini ? "Disputes" : "")
+    </MudNavLink>
+
+    <MudNavLink Href="/surveys" Icon="@Icons.Material.Outlined.AccountBalanceWallet">
+        @(!IsMini ? "Surveys" : "")
+    </MudNavLink>
+
+    <MudNavLink Href="/propertyTransfers" Icon="@Icons.Material.Outlined.AccountBalanceWallet">
+        @(!IsMini ? "Property Transfer" : "")
+    </MudNavLink>
+</MudNavMenu>
+
+@code {
+    [Parameter] public bool IsMini { get; set; }
+}

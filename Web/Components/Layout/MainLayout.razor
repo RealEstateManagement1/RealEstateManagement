@@ -1,16 +1,34 @@
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 @using Application.Interfaces
 @using Infrastructure.Identity
 @using MudBlazor
-@inject NavigationManager NavigationManager
-@inject IUserContext UserContext
 
-<MudThemeProvider Theme="_theme" 
-@bind-IsDarkMode="_isDarkMode" />
+<MudThemeProvider Theme="_theme" @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+<MudLayout>
+    <MudAppBar Elevation="0" Color="Color.Transparent" Fixed="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Default" Edge="Edge.Start" OnClick="DrawerToggle" />
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.NotificationsNone" Color="Color.Default" />
+        <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" Color="Color.Inherit" OnClick="ToggleTheme" />
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Mini" Elevation="0" Class="py-4">
+        <div class="d-flex align-center justify-center mb-6 mt-2">
+            <MudIcon Icon="@Icons.Material.Filled.Home" Color="Color.Primary" Size="Size.Large" />
+        </div>
+        <NavMenu IsMini="!_drawerOpen" />
+    </MudDrawer>
+
+    <MudMainContent Class="pa-0">
+        <MudPaper Elevation="0" Class="content-fill pa-8" Style="@(_isDarkMode ? "background-color: #0B1139;" : "background-color: #F4F7FE;")">
+            @Body
+        </MudPaper>
+    </MudMainContent>
+</MudLayout>
 
 <style>
     html, body {
@@ -25,18 +43,10 @@
         display: flex;
     }
 
-    /* Side Drawer Background */
-    .white-drawer {
-        background-color: #FFFFFF !important;
-        border-right: 1px solid #F0F2F5 !important;
-    }
-
-    /* Main Content Area */
     .mud-main-content {
         min-height: 100vh;
         padding-top: 0 !important;
         flex: 1;
-        @* overflow-x: auto; *@
         max-width: 100%;
     }
 
@@ -44,47 +54,6 @@
         height: 100%;
         min-height: 100vh;
         border-radius: 0 !important;
-    }
-
-    /* Default Navigation Link Styling */
-    .mud-nav-link {
-        font-weight: 600 !important;
-        font-size: 0.98rem !important;
-        color: #020818 !important; /* Muted grey for inactive items */
-        @* margin: 4px 0; *@
-        border-right: 4px solid transparent;
-    }
-
-    .mud-nav-link .mud-nav-link-icon {
-        color: #14151a !important;
-        margin-right: 16px;
-    }
-
-    /* Active Link Styling (Matching Screenshot) */
-    .mud-nav-link.active {
-        background-color: transparent !important;
-        color: #1B2559 !important; /* Deep dark blue for active text */
-        font-weight: 700 !important;
-        border-right: 4px solid #FF7A00 !important; /* Orange indicator */
-    }
-
-    .mud-nav-link.active .mud-nav-link-icon {
-        color: #FF7A00 !important; /* Icon turns orange when active */
-    }
-
-    /* Typography Overrides */
-    .brand-title {
-        color: #1B2559;
-        font-weight: 800;
-        line-height: 1.1;
-        font-family: 'Century Gothic';
-    }
-
-    .brand-subtitle {
-        color: #A3AED0;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 1px;
     }
 </style>
 
@@ -152,27 +121,27 @@
                 @(_drawerOpen ? "Dashboard" : "")
             </MudNavLink>
 
-            <MudNavLink href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
+            @* <MudNavLink href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
                 @(_drawerOpen ? "Reports" : "")
             </MudNavLink>
 
             <MudNavLink href="/accounts" Icon="@Icons.Material.Outlined.ManageAccounts">
                 @(_drawerOpen ? "Account" : "")
-            </MudNavLink>
+            </MudNavLink> *@
 
              <MudNavLink href="/Properties" Icon="@Icons.Material.Outlined.Home">
                    @(_drawerOpen ? "Properties" : "")
              </MudNavLink>
 
-            <MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
+            @* <MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
                 @(_drawerOpen ? "LoanProducts" : "")
             </MudNavLink>
 
             <MudNavLink href="/Borrower" Icon="@Icons.Material.Outlined.People">
                 @(_drawerOpen ? "Borrowers" : "")
-            </MudNavLink>
+            </MudNavLink> *@
 
-            <MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
+            @* <MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
                 <MudNavLink href="/LoanApplication" Icon="@Icons.Material.Outlined.Assignment"> Loan Application</MudNavLink>
                 <MudNavLink href="/Guarantor" Icon="@Icons.Material.Outlined.GppGood">Guarantors</MudNavLink>
                 <MudNavLink href="/collateral" Icon="@Icons.Material.Outlined.Money">Collateral</MudNavLink>
@@ -197,7 +166,7 @@
 
             <MudNavLink href="/ProcessFeeDeposits" Icon="@Icons.Material.Outlined.Money">
                 @(_drawerOpen ? "Process Fee" : "")
-            </MudNavLink>
+            </MudNavLink> *@
 
             <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="false">
                 <MudNavLink Href="/Settings" Icon="@Icons.Material.Filled.Settings">Settings</MudNavLink>
@@ -214,29 +183,26 @@
 </MudLayout>
 
 @code {
-    bool _drawerOpen = true;
-    bool _isDarkMode = false;
-  
-    private MudTheme _theme = new MudTheme()
+    private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+
+    private MudTheme _theme = new()
     {
         PaletteLight = new PaletteLight()
         {
-            Primary = "#FF7A00",
+            Primary = "#4318FF",
             Background = "#F4F7FE",
-            AppbarBackground = "rgba(255,255,255,0)",
             DrawerBackground = "#FFFFFF",
-            TextPrimary = "#1B2559",
-            ActionDefault = "#A3AED0"
+            TextPrimary = "#1B2559"
         },
         PaletteDark = new PaletteDark()
         {
-            Primary = "#FF8C00",
-            Background = "#0B1139", 
-            Surface = "#111C44",    
+            Primary = "#6366F1",
+            Background = "#0B1139",
+            Surface = "#111C44",
             AppbarBackground = "#0B1139",
             DrawerBackground = "#111C44",
-            TextPrimary = "#FFFFFF",
-            ActionDefault = "#FFFFFF"
+            TextPrimary = "#FFFFFF"
         }
     };
 
@@ -245,7 +211,6 @@
         _theme.Typography.Default.FontFamily = new[] { "Century Gothic", "Arial", "sans-serif" };
     }
 
-    void DrawerToggle() => _drawerOpen = !_drawerOpen;
-    void ToggleTheme() => _isDarkMode = !_isDarkMode;
-    void Logout() => NavigationManager.NavigateTo("/account/login");
+    private void DrawerToggle() => _drawerOpen = !_drawerOpen;
+    private void ToggleTheme() => _isDarkMode = !_isDarkMode;
 }

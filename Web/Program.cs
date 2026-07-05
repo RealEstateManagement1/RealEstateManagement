@@ -1,4 +1,13 @@
 using Web.Components;
+using MudBlazor.Services;
+using Infrastructure.DependencyInjection;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Infrastructure.DependencyInjection;
@@ -40,8 +49,20 @@ builder.Services.AddScoped<IPropertyTransferService, PropertyTransferService>();
 // builder.Services.AddSingleton<IFileProvider>(builder.Environment.WebRootFileProvider);
 // builder.Services.AddSingleton<ILocationService, JsonLocationService>();
 
+builder.Services.AddMudServices();
+
+// Infrastructure services: DbContext, repositories, LandTitleService, DocumentService
+builder.Services.AddInfrastructure(builder.Configuration);
+
 // --- 2. BUILD THE APP ---
 var app = builder.Build();
+
+// Ensure the database is created and migrations are applied
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 // --- 3. MIDDLEWARE PIPELINE ---.
 if (!app.Environment.IsDevelopment())
@@ -49,6 +70,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
+app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseHttpsRedirection();
+app.UseAntiforgery();
 app.UseStatusCodePagesWithReExecute("/Error");
 app.UseHttpsRedirection();
 app.UseAntiforgery();

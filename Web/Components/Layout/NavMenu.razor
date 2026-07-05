@@ -1,3 +1,45 @@
+﻿<div class="nav-brand">
+    <div class="sidebar-logo">
+        <img src="images/duture-neza-logo.png"/>
+    </div>
+    <h2>Real Estate Management</h2>
+</div>
+
+<nav class="nav flex-column">
+    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+        <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
+    </NavLink>
+
+    <NavLink class="nav-link" href="landtitles">
+        <span class="bi bi-pin-map-fill" aria-hidden="true"></span> Land Titles
+    </NavLink>
+
+    <NavLink class="nav-link" href="documents">
+        <span class="bi bi-file-earmark-text" aria-hidden="true"></span> Documents
+    </NavLink>
+
+    <NavLink class="nav-link" href="weather">
+        <span class="bi bi-cloud-sun-fill" aria-hidden="true"></span> Weather
+    </NavLink>
+</nav>
+
+<style>
+    .mud-nav-link.active {
+        color: white !important;
+        background-color: transparent !important;
+        font-weight: 700;
+        border-right: 4px solid #4318FF;
+    }
+    .mud-nav-link.active .mud-nav-link-icon {
+        color: #4318FF !important;
+    }
+</style>
+
+
+
+@code {
+    [Parameter] public bool IsMini { get; set; }
+}
 ﻿@using MudBlazor
 
 <MudNavMenu>

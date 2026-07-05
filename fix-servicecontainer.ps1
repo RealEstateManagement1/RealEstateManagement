@@ -1,4 +1,7 @@
-﻿using Infrastructure.Data;
+$path = "C:\Users\HP\Projects\RealEstateManagement\Infrastructure\DependencyInjection\ServiceContainer.cs"
+
+Set-Content -Path $path -Encoding utf8 -Value @"
+using Infrastructure.Data;
 using Infrastructure.Repository;
 using Infrastructure.Repository.Interfaces;
 using Infrastructure.Services;
@@ -25,3 +28,6 @@ namespace Infrastructure.DependencyInjection
         }
     }
 }
+"@
+
+Write-Host "ServiceContainer.cs updated successfully."

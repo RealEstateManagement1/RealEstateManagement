@@ -1,4 +1,6 @@
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
+@using Application.Interfaces
+@using Infrastructure.Identity
 @using MudBlazor
 
 <MudThemeProvider Theme="_theme" @bind-IsDarkMode="_isDarkMode" />
@@ -54,6 +56,131 @@
         border-radius: 0 !important;
     }
 </style>
+
+<MudLayout>
+    @* Top AppBar *@
+    <MudAppBar Elevation="0" Color="Color.Transparent" Fixed="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Default" Edge="Edge.Start" OnClick="DrawerToggle" />
+        <MudSpacer />
+        
+        <MudIconButton Icon="@Icons.Material.Filled.NotificationsNone" Color="Color.Default" />
+        
+        <MudIconButton
+            Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+            Color="Color.Default"
+            OnClick="ToggleTheme" />
+
+        @if (UserContext.IsAuthenticated)
+        {
+            <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense="true" Class="ml-4">
+                <ActivatorContent>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="cursor-pointer">
+                        <MudAvatar Color="Color.Primary" Size="Size.Small" Style="font-weight: bold;">
+                        </MudAvatar>
+
+                        <div class="d-none d-md-flex flex-column">
+                            <MudText Typo="Typo.body2" Style="line-height: 1.1; font-weight: 800; font-size: 1.05rem; color: #1B2559;">
+                                @UserContext.FullName
+                            </MudText>
+
+                            <MudText Typo="Typo.caption" Color="Color.Primary" Style="line-height: 1.1; font-size: 0.9rem;">
+                                @UserContext.Email
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Size="Size.Medium" Color="Color.Primary" />
+                    </MudStack>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem OnClick="Logout">Logout</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+        }
+    </MudAppBar>
+
+    @* Side Navigation Drawer *@
+    <MudDrawer @bind-Open="_drawerOpen" 
+               Variant="DrawerVariant.Mini" 
+               OpenMiniOnHover="false" 
+               Elevation="0" 
+               Class="py-4 white-drawer">
+               
+        
+        <div class="d-flex align-center justify-center mb-10 mt-2 px-4">
+             <img src="/duture-neza-logo.png" alt="Duture Neza Logo" style="height: 48px; width: auto; object-fit: contain;" />
+            @if (_drawerOpen)
+            {
+                <div class="d-flex flex-column ml-3">
+                    <MudText Typo="Typo.h6" Class="brand-title">Real Estate </MudText>
+                    <MudText Class="brand-subtitle">Management</MudText>
+                </div>
+            }
+        </div>
+
+        <MudNavMenu>
+            <MudNavLink href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard">
+                @(_drawerOpen ? "Dashboard" : "")
+            </MudNavLink>
+
+            @* <MudNavLink href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
+                @(_drawerOpen ? "Reports" : "")
+            </MudNavLink>
+
+            <MudNavLink href="/accounts" Icon="@Icons.Material.Outlined.ManageAccounts">
+                @(_drawerOpen ? "Account" : "")
+            </MudNavLink> *@
+
+             <MudNavLink href="/Properties" Icon="@Icons.Material.Outlined.Home">
+                   @(_drawerOpen ? "Properties" : "")
+             </MudNavLink>
+
+            @* <MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
+                @(_drawerOpen ? "LoanProducts" : "")
+            </MudNavLink>
+
+            <MudNavLink href="/Borrower" Icon="@Icons.Material.Outlined.People">
+                @(_drawerOpen ? "Borrowers" : "")
+            </MudNavLink> *@
+
+            @* <MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
+                <MudNavLink href="/LoanApplication" Icon="@Icons.Material.Outlined.Assignment"> Loan Application</MudNavLink>
+                <MudNavLink href="/Guarantor" Icon="@Icons.Material.Outlined.GppGood">Guarantors</MudNavLink>
+                <MudNavLink href="/collateral" Icon="@Icons.Material.Outlined.Money">Collateral</MudNavLink>
+                <MudNavLink href="/ProvidedDocuments" Icon="@Icons.Material.Outlined.Description">Documents</MudNavLink>
+            </MudNavGroup>
+
+            <MudNavLink href="/Disbursements" Icon="@Icons.Material.Outlined.Money">
+                @(_drawerOpen ? "Disbursement" : "")
+            </MudNavLink>
+
+            <MudNavLink href="/Payments" Icon="@Icons.Material.Outlined.Money">
+                @(_drawerOpen ? "Payments" : "")
+            </MudNavLink>
+
+            <MudNavLink href="/Penality" Icon="@Icons.Material.Outlined.Money">
+                @(_drawerOpen ? "Penality" : "")
+            </MudNavLink>
+
+            <MudNavLink href="/waivers" Icon="@Icons.Material.Outlined.GppGood">
+                  @(_drawerOpen ? "Waivers" : "")
+            </MudNavLink>
+
+            <MudNavLink href="/ProcessFeeDeposits" Icon="@Icons.Material.Outlined.Money">
+                @(_drawerOpen ? "Process Fee" : "")
+            </MudNavLink> *@
+
+            <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="false">
+                <MudNavLink Href="/Settings" Icon="@Icons.Material.Filled.Settings">Settings</MudNavLink>
+                <MudNavLink Href="/Users" Icon="@Icons.Material.Filled.People">Users</MudNavLink>
+            </MudNavGroup>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="pa-0">
+        <MudPaper Elevation="0" Class="content-fill pa-8" Style="@(_isDarkMode ? "background-color: #0B1139;" : "background-color: #F4F7FE;")">
+            @Body
+        </MudPaper>
+    </MudMainContent>
+</MudLayout>
 
 @code {
     private bool _drawerOpen = true;

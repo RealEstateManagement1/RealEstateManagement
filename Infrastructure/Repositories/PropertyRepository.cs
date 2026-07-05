@@ -69,6 +69,7 @@ namespace Infrastructure.Repositories
                 property.PropertyStatus = dto.PropertyStatus;
                 property.PropertyLocation = dto.PropertyLocation;
                 property.PropertyDocuments = dto.PropertyDocuments;
+
                 property.PropertyEstimatedValue = dto.PropertyEstimatedValue;
                 property.PropertyDocumentType = dto.PropertyDocumentType;
                 property.PropertyImages = dto.PropertyImages;

@@ -28,6 +28,9 @@ namespace Infrastructure.DependencyInjection
                 // Register repositories
                 services.AddScoped<IPerson, PersonRepository>();
                 services.AddScoped<IProperty, PropertyRepository>();
+                services.AddScoped<IDispute, DisputeRepository>();
+                services.AddScoped<ISurvey, SurveyRepository>();
+                services.AddScoped<IPropertyTransfer, PropertyTransferRepository>();
                 services.AddScoped<IPropertyService, Application.Services.Properties.PropertyService>();
 
                   

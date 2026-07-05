@@ -8,11 +8,11 @@ namespace Infrastructure.Repositories
 {
     public class DisputeRepository : IDispute
     {
-      private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+      private readonly ApplicationDbContext _dbContext;
 
-      public DisputeRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
+      public DisputeRepository(ApplicationDbContext dbContext)
         {
-            _dbContextFactory = dbContextFactory;
+            _dbContext = dbContext;
         }
 
       //Retrieving Disputes
@@ -35,21 +35,18 @@ namespace Infrastructure.Repositories
 
         public async Task<List<Dispute>> GetAllDisputesAsync()
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            return await dbContext.Disputes
+            return await _dbContext.Disputes
                 .ToListAsync();
         }
 
         public async Task<Dispute?> GetDisputeByIdAsync(int id)
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            return await dbContext.Disputes
+            return await _dbContext.Disputes
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task CreateDisputeAsync(DisputeCreateDTO DisputeDTO)
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             Dispute Dispute = new()
             {
                 PropertyId = DisputeDTO.PropertyId,
@@ -57,8 +54,8 @@ namespace Infrastructure.Repositories
                 Description = DisputeDTO.Description,
                 Status = DisputeDTO.Status
             };
-            dbContext.Disputes.Add(Dispute);
-            await dbContext.SaveChangesAsync();
+            _dbContext.Disputes.Add(Dispute);
+            await _dbContext.SaveChangesAsync();
         }
     
 

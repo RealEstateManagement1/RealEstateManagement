@@ -1,155 +1,23 @@
 ﻿@using MudBlazor
-@* <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Web</a>
-    </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<MudNavMenu>
+    <MudNavLink Href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard">
+        @(!IsMini ? "Dashboard" : "")
+    </MudNavLink>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    <MudNavLink Href="/disputes" Icon="@Icons.Material.Outlined.ManageAccounts">
+        @(!IsMini ? "Disputes" : "")
+    </MudNavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+    <MudNavLink Href="/surveys" Icon="@Icons.Material.Outlined.AccountBalanceWallet">
+        @(!IsMini ? "Surveys" : "")
+    </MudNavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
- *@
-
-<style>
-    .mud-nav-link.active {
-        color: white !important;
-        background-color: transparent !important;
-        font-weight: 700;
-        border-right: 4px solid #049309;
-    }
-    .mud-nav-link.active .mud-nav-link-icon {
-        color: #049309 !important;
-        border-right: 4px solid #4318FF;
-    }
-    .mud-nav-link.active .mud-nav-link-icon {
-        color: #4318FF !important;
-    }
-</style>
-
-
+    <MudNavLink Href="/propertyTransfers" Icon="@Icons.Material.Outlined.AccountBalanceWallet">
+        @(!IsMini ? "Property Transfer" : "")
+    </MudNavLink>
+</MudNavMenu>
 
 @code {
     [Parameter] public bool IsMini { get; set; }
 }
-
-<MudNavMenu>
-    <MudNavLink href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard">
-        @(!IsMini ? "Dashboard" : "")
-    </MudNavLink>
-
-     <MudNavLink href="/disputes" Icon="@Icons.Material.Outlined.ManageAccounts">
-        @(!IsMini ? "Disputes" : "")
-    </MudNavLink>
-     <MudNavLink href="/surveys" Icon="@Icons.Material.Outlined.ManageAccounts">
-        @(!IsMini ? "Surveys" : "")
-    </MudNavLink>
-    
-    <MudNavLink href="/propertyTransfers" Icon="@Icons.Material.Outlined.AccountBalanceWallet">
-        @(!IsMini ? "Property Transfer" : "")
-    </MudNavLink>
-
-@* <MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
-    <MudNavLink Href="/Reports" Icon="@Icons.Material.Outlined.BarChart">
-        @(!IsMini ? "Reports" : "")
-    </MudNavLink>
-
-     <MudNavLink href="/accounts" Icon="@Icons.Material.Outlined.ManageAccounts">
-        @(!IsMini ? "Account" : "")
-    </MudNavLink>
-    
-    <MudNavLink href="/Properties" Icon="@Icons.Material.Outlined.Home">
-        @(!IsMini ? "Properties" : "")
-    </MudNavLink>
-    
-    @* <MudNavLink href="/loans" Icon="@Icons.Material.Outlined.AccountBalanceWallet">
-        @(!IsMini ? "My Loans" : "")
-    </MudNavLink> *@
-
-<MudNavLink href="/loanProducts" Icon="@Icons.Material.Outlined.Paid">
-        @(!IsMini ? "LoanProducts" : "")
-    </MudNavLink>
-
-    <MudNavLink href="/Borrower" Icon="@Icons.Material.Outlined.People">
-        @(!IsMini ? "Borrowers" : "")
-    </MudNavLink> *@
-    </MudNavLink>
-
-    @* <MudNavLink href="/ProvidedDocuments" Icon="@Icons.Material.Outlined.Description">
-        @(!IsMini ? "Documents" : "")
-</MudNavLink> *@
-    @* <MudNavLink href="/LoanApplication" Icon="@Icons.Material.Outlined.Assignment">
-        @(!IsMini ? "Application" : "")
-    </MudNavLink> *@
-
-@* <MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
-<MudNavGroup Title="Application" Icon="@Icons.Material.Filled.Assignment" Expanded="false">
-    <MudNavLink href="/LoanApplication" Icon="@Icons.Material.Outlined.Assignment">
-        @(!IsMini ? "Application" : "")
-    </MudNavLink>
-     <MudNavLink href="/Guarantor" Icon="@Icons.Material.Outlined.GppGood">
-        @(!IsMini ? "Guarantors" : "")
-    </MudNavLink>
-    <MudNavLink href="/collateral" Icon="@Icons.Material.Outlined.Money">
-        @(!IsMini ? "Collateral" : "")
-    </MudNavLink>
-    <MudNavLink href="/ProvidedDocuments" Icon="@Icons.Material.Outlined.Description">
-        @(!IsMini ? "Documents" : "")
-</MudNavLink>
-
-</MudNavGroup> *@
-</MudNavGroup>
-
-    @* <MudNavLink href="/Guarantor" Icon="@Icons.Material.Outlined.GppGood">
-        @(!IsMini ? "Guarantors" : "")
-    </MudNavLink> *@
-     
-
-     <MudNavLink href="/Disbursements" Icon="@Icons.Material.Outlined.Money">
-        @(!IsMini ? "Disbursement" : "")
-    </MudNavLink>
-
-     @* <MudNavLink href="/collateral" Icon="@Icons.Material.Outlined.Money">
-        @(!IsMini ? "Collateral" : "")
-    </MudNavLink>   *@
-@* 
-     <MudNavLink href="/Payments" Icon="@Icons.Material.Outlined.Money">
-        @(!IsMini ? "Payments" : "")
-    </MudNavLink>
-
-     <MudNavLink href="/Penality" Icon="@Icons.Material.Outlined.Money">
-        @(!IsMini ? "Penality" : "")
-    </MudNavLink>
-
-    <MudNavLink href="/ProcessFeeDeposits" Icon="@Icons.Material.Outlined.Money">
-        @(!IsMini ? "Process Fee Deposits" : "")
-    </MudNavLink>
-
-<MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="false">
-    <MudNavLink Href="/Settings" Icon="@Icons.Material.Filled.Settings">
-        @(!IsMini ? "Settings" : "")
-    </MudNavLink>
-    <MudNavLink Href="/Users" Icon="@Icons.Material.Filled.People">
-        @(!IsMini ? "Users" : "")
-    </MudNavLink> *@
-@* </MudNavGroup> *@
-</MudNavMenu>

@@ -8,11 +8,11 @@ namespace Infrastructure.Repositories
 {
     public class PropertyTransferRepository : IPropertyTransfer
     {
-      private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+      private readonly ApplicationDbContext _dbContext;
 
-      public PropertyTransferRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
+      public PropertyTransferRepository(ApplicationDbContext dbContext)
         {
-            _dbContextFactory = dbContextFactory;
+            _dbContext = dbContext;
         }
 
       //Retrieving Disputes
@@ -35,21 +35,18 @@ namespace Infrastructure.Repositories
 
         public async Task<List<PropertyTransfer>> GetAllPropertyTransfersAsync()
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            return await dbContext.PropertyTransfers
+            return await _dbContext.PropertyTransfers
                 .ToListAsync();
         }
 
         public async Task<PropertyTransfer> GetPropertyTransferByIdAsync(int id)
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            return await dbContext.PropertyTransfers
+            return await _dbContext.PropertyTransfers
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task CreatePropertyTransferAsync(PropertyTransferCreateDTO PropertyTransferDTO)
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             PropertyTransfer PropertyTransfer = new()
             {
                 PropertyId = PropertyTransferDTO.PropertyId,
@@ -59,8 +56,8 @@ namespace Infrastructure.Repositories
                 TransferDate = PropertyTransferDTO.TransferDate,
                 Amount = PropertyTransferDTO.Amount
             };
-            dbContext.PropertyTransfers.Add(PropertyTransfer);
-            await dbContext.SaveChangesAsync();
+            _dbContext.PropertyTransfers.Add(PropertyTransfer);
+            await _dbContext.SaveChangesAsync();
         }
     
     }

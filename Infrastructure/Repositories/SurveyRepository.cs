@@ -8,11 +8,11 @@ namespace Infrastructure.Repositories
 {
     public class SurveyRepository : ISurvey
     {
-      private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+      private readonly ApplicationDbContext _dbContext;
 
-      public SurveyRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
+      public SurveyRepository(ApplicationDbContext dbContext)
         {
-            _dbContextFactory = dbContextFactory;
+            _dbContext = dbContext;
         }
 
       //Retrieving Disputes
@@ -35,21 +35,18 @@ namespace Infrastructure.Repositories
 
         public async Task<List<Survey>> GetAllSurveysAsync()
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            return await dbContext.Surveys
+            return await _dbContext.Surveys
                 .ToListAsync();
         }
 
         public async Task<Survey> GetSurveyByIdAsync(int id)
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            return await dbContext.Surveys
+            return await _dbContext.Surveys
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task CreateSurveyAsync(SurveyCreateDTO SurveyDTO)
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             Survey Survey = new()
             {
                 PropertyId = SurveyDTO.PropertyId,
@@ -57,8 +54,8 @@ namespace Infrastructure.Repositories
                 SurveyDate = SurveyDTO.SurveyDate,
                 Coordinates = SurveyDTO.Coordinates
             };
-            dbContext.Surveys.Add(Survey);
-            await dbContext.SaveChangesAsync();
+            _dbContext.Surveys.Add(Survey);
+            await _dbContext.SaveChangesAsync();
         }
     
 

@@ -1,9 +1,13 @@
 using Web.Components;
 using Infrastructure.Data;
 using Infrastructure.Identity;
+using Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Application.Interfaces;
+using Application.Services.Disputes;
+using Application.Services.Surveys;
+using Application.Services.PropertyTransfers;
 using Application.Services.Users;
 using Application.Services.Properties;
 using Infrastructure.Repositories;
@@ -11,18 +15,14 @@ using MudBlazor.Services;
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
 using Web.Services;
+using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. SERVICES REGISTRATION ---
 
-// Register infrastructure services (includes DbContext)
+// Register infrastructure services (includes DbContext, authentication, and identity)
 builder.Services.AddInfrastructureServices(builder.Configuration);
-
-// Identity configuration
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
 
 // Core Services
 builder.Services.AddMudServices();
@@ -32,7 +32,6 @@ builder.Services.AddControllers(); // Moved up from the bottom
 builder.Services.AddAuthorization(); // Moved up from the bottom
 
 // Business Services
-builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IDisputeService, DisputeService>();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<IPropertyTransferService, PropertyTransferService>();

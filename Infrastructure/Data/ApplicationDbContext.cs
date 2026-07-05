@@ -1,14 +1,12 @@
-using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
-// using Infrastructure.Identity;
-using System.Linq;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
-    // public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -18,90 +16,23 @@ namespace Infrastructure.Data
         public DbSet<Dispute> Disputes { get; set; }
         public DbSet<Survey> Surveys { get; set; }
         public DbSet<PropertyTransfer> PropertyTransfers { get; set; }
-       
+        public DbSet<Person> Persons { get; set; }
+        public DbSet<Owner> Owners { get; set; }
+        public DbSet<User> ApplicationUsers { get; set; }
+        public DbSet<Property> Properties { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
+            modelBuilder.Entity<User>().ToTable("AspNetUsers");
+            modelBuilder.Entity<Person>().ToTable("Persons");
+            modelBuilder.Entity<IdentityRole<int>>().ToTable("Roles");
+            modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
+            modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
+            modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
+            modelBuilder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
+            modelBuilder.Entity<IdentityUserRole<int>>().ToTable("UserRoles").HasKey(ur => new { ur.UserId, ur.RoleId });
         }
-        // protected override void OnModelCreating(ModelBuilder builder)
-        // {
-            // 1. MUST call base first for Identity configurations
-            // base.OnModelCreating(builder);
-
-            // 2. Fix Cascade Path for Disbursements
-            // builder.Entity<Dispute>();
-                // .HasOne(d => d.PaymentModality)
-                // .WithMany() 
-                // .HasForeignKey(d => d.PaymentModalityId)
-                // .OnDelete(DeleteBehavior.Restrict);
-
-      
-    // // Disable cascade delete between Borrower and ProcessFeeDeposits
-    //     builder.Entity<ProcessFeeDeposit>()
-    //     .HasOne(p => p.Borrower)
-    //     .WithMany() 
-    //     .HasForeignKey(p => p.BorrowerId)
-    //     .OnDelete(DeleteBehavior.NoAction);
-
-    //         // 3. Set Decimal Precision globally
-    //         foreach (var property in builder.Model.GetEntityTypes()
-    //             .SelectMany(t => t.GetProperties())
-    //             .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
-    //         {
-    //             property.SetColumnType("decimal(18,2)");
-    //         }
-
-    //         // 4. Enum Conversions
-    //         builder.Entity<LoanApplication>()
-    //             .Property(t => t.Status)
-    //             .HasConversion<string>();
-
-            // 5. Identity Table Renaming
-            // builder.Entity<User>().ToTable("Users");
-            // builder.Entity<IdentityRole<int>>().ToTable("Roles");
-            // builder.Entity<IdentityUserRole<int>>().ToTable("UserRoles");
-            // builder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
-            // builder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
-            // builder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
-            // builder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
-
-            // Note: base.OnModelCreating already handles the composite key for UserRoles. 
-            // Re-declaring it is usually unnecessary unless you've changed the Identity behavior significantly.
-        }
-    }
-using Infrastructure.Identity;
-
-using System.Linq;
-using Application.Interfaces;
-
-namespace Infrastructure.Data
-{
-   public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
-    {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
-
-        public DbSet<Person> Persons { get; set; }
-        public DbSet<User> ApplicationUsers { get; set; }
-        public DbSet<Property> Properties { get; set; }
-        protected override void OnModelCreating(ModelBuilder Builder)
-        {
-            base.OnModelCreating(Builder);
-
-            // customize Identity tables
-                Builder.Entity<User>().ToTable("AspNetUsers");
-                Builder.Entity<Person>().ToTable("Persons");
-                Builder.Entity<IdentityRole<int>>().ToTable("Roles");
-                Builder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
-                Builder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
-                Builder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
-                Builder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
-                Builder.Entity<IdentityUserRole<int>>().ToTable("UserRoles").HasKey(ur => new { ur.UserId, ur.RoleId });
-              
-               
-                
-}
     }
 }

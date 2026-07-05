@@ -1,0 +1,108 @@
+﻿@using Infrastructure.Services
+@page "/landtitles"
+@using Web.Models
+@using LandTitleEntity = Domain.Entities.LandTitle
+@rendermode InteractiveServer
+
+@inject LandTitleService LandTitleService
+
+<div class="page-header">
+    <div>
+        <h1>Land Titles</h1>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-green btn-brand-lg" @onclick="OpenCreateDialog">+ New Land Title</button>
+        <span class="badge bg-green text-white py-2 px-3">@titles.Count records</span>
+    </div>
+</div>
+
+@if (showDialog)
+{
+    <div class="form-panel mb-4">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">Add record</p>
+                <h2>New land title</h2>
+            </div>
+            <button class="btn btn-outline-black btn-sm" @onclick="() => showDialog = false">Cancel</button>
+        </div>
+        <LandTitleDialog Model="currentModel" OnSaved="HandleSaved" />
+    </div>
+}
+
+<div class="card-panel">
+    <div class="panel-header">
+        <div>
+            <p class="panel-label">Active titles</p>
+            <h2>Land title registry</h2>
+        </div>
+        <span class="badge bg-green text-white py-2 px-3">All titles</span>
+    </div>
+
+    @if (titles.Count == 0)
+    {
+        <div class="alert alert-soft">No land titles are available yet.</div>
+    }
+    else
+    {
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Property ID</th>
+                    <th>Title Number</th>
+                    <th>Issue Date</th>
+                    <th>Expiry Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var title in titles)
+                {
+                    <tr>
+                        <td class="font-monospace" style="font-size:0.8rem">@title.PropertyId</td>
+                        <td>@title.TitleNumber</td>
+                        <td>@title.IssueDate.ToString("dd MMM yyyy")</td>
+                        <td>@title.ExpiryDate.ToString("dd MMM yyyy")</td>
+                        <td><span class="status-chip">@title.Status</span></td>
+                        <td>
+                            <a class="btn btn-outline-black btn-sm" href="@($"/landtitles/{title.Id}")">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<LandTitleEntity> titles = new();
+    private bool showDialog;
+    private LandTitleViewModel currentModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await LandTitleService.GetAllAsync();
+        titles = result.ToList();
+    }
+
+    private void OpenCreateDialog()
+    {
+        currentModel = new LandTitleViewModel
+        {
+            PropertyIdText = Guid.NewGuid().ToString()
+        };
+        showDialog = true;
+        StateHasChanged();
+    }
+
+    private async Task HandleSaved(LandTitleEntity landTitle)
+    {
+        await LandTitleService.AddAsync(landTitle);
+        var result = await LandTitleService.GetAllAsync();
+        titles = result.ToList();
+        showDialog = false;
+        StateHasChanged();
+    }
+}
+

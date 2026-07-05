@@ -1,0 +1,76 @@
+
+@using Application.Interfaces
+@using Domain.Entities
+@using MudBlazor
+
+@* @using Domain.ValueObjects *@
+@using Application.Services.Surveys
+@using System.Globalization
+
+@inject NavigationManager NavigationManager
+
+ <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="BackToSurveys" StartIcon="@Icons.Material.Filled.ArrowBack">
+                    Back to List
+                </MudButton>
+<MudDialog>
+    
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2"/> Account Details
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_surveys == null)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else
+        {
+            <MudGrid Spacing="2">
+                <MudItem xs="6">
+                    <MudTextField Label="Survey ID" Value="@_surveys.Id" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="PropertyId" Value="@_surveys.PropertyId" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="SurveyorName" Value="@_surveys.SurveyorName" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="SurveyDate" Value="@_surveys.SurveyDate" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+               
+                <MudItem xs="6">
+                    <MudTextField Label="Coordinates" Value="@_surveys.Coordinates" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>
+                             
+                    @* <MudItem xs="6">
+                        <MudTextField Label="AccountType" Value="@_accounts.AccountType" ReadOnly Variant="Variant.Outlined" />
+                </MudItem>  *@
+              
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public int Id { get; set; } 
+    
+    [Inject] ISurveyService SurveyService { get; set; }
+
+    private Survey _surveys;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _surveys = await SurveyService.GetSurveyByIdAsync(Id);
+    }
+    private void Close() => MudDialog.Close();
+     private void BackToSurveys()
+    {
+        NavigationManager.NavigateTo("/Surveys");
+    }
+}

@@ -1,0 +1,69 @@
+﻿@using Web.Models
+@using LandTitleEntity = Domain.Entities.LandTitle
+@using Domain.Entities
+@rendermode InteractiveServer
+
+<div class="form-panel">
+    <div class="panel-header">
+        <div>
+            <p class="panel-label">Create title</p>
+            <h2>New Land Title</h2>
+        </div>
+    </div>
+
+    <EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Property ID <span class="text-muted" style="font-size:0.78rem">(auto-generated, editable)</span></label>
+            <InputText class="form-control font-monospace" @bind-Value="Model.PropertyIdText" />
+            <div class="form-text">A unique ID is generated for you. You may edit it if needed.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Title Number</label>
+            <InputText class="form-control" @bind-Value="Model.TitleNumber" />
+            <ValidationMessage For="@(() => Model.TitleNumber)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Issue Date</label>
+            <InputDate class="form-control" @bind-Value="Model.IssueDate" />
+            <ValidationMessage For="@(() => Model.IssueDate)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Expiry Date</label>
+            <InputDate class="form-control" @bind-Value="Model.ExpiryDate" />
+            <ValidationMessage For="@(() => Model.ExpiryDate)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <InputSelect class="form-select" @bind-Value="Model.Status">
+                @foreach (var status in Enum.GetValues<LandTitleStatus>())
+                {
+                    <option value="@status">@status</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Model.Status)" />
+        </div>
+
+        <button type="submit" class="btn btn-brand btn-brand-lg">Save Land Title</button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public LandTitleViewModel Model { get; set; } = new LandTitleViewModel();
+
+    [Parameter]
+    public EventCallback<LandTitleEntity> OnSaved { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        var entity = Model.ToEntity();
+        await OnSaved.InvokeAsync(entity);
+    }
+}

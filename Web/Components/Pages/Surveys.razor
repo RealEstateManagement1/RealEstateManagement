@@ -1,0 +1,148 @@
+@page "/surveys"
+@using Application.Interfaces
+@using MudBlazor
+@using Domain.Entities
+@using Application.Services.Surveys
+
+
+@inject ISurveyService SurveyService
+
+@inject IDialogService DialogService
+
+<PageTitle>Surveys</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    @* 1. TOP TITLE AND SEARCH BAR *@
+    <div class="d-flex align-center justify-space-between mb-6">
+        <MudText Typo="Typo.h5" Style="font-weight: 800; color: #247423;">Surveys</MudText>
+        @* <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Style="text-transform:none;">
+            Add Dispute
+        </MudButton> *@
+    </div>
+
+    @* 2. SEARCH AND FILTER ROW *@
+    <MudGrid Class="mb-4" Spacing="2">
+        @* <MudItem xs="12" sm="4">
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Variant="Variant.Outlined" 
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+                          Margin="Margin.Dense" Class="bg-white rounded-lg" />
+        </MudItem> *@
+        <MudItem xs="12" sm="8" Class="d-flex align-center justify-end gap-4">
+            @if (_selectedItems.Any())
+            {
+               <MudText Style="color: #d46b24;" Typo="Typo.subtitle2">@_selectedItems.Count Selected</MudText>
+                @* <MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => OpenDetailDialog(_selectedItems.First().Id))" /> *@
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+                <MudDivider Vertical="true" FlexItem="true" Class="mx-2" />
+            }
+            <MudButton StartIcon="@Icons.Material.Filled.FilterList" Variant="Variant.Text">Filter</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Sort" Variant="Variant.Text">Sort by</MudButton>
+            @* <MudSelect T="string" Label="FirstName" Dense="true" Margin="Margin.Dense" Outlined="true" Style="width: 150px; background: white;">
+                <MudSelectItem Value="@("All")" />
+            </MudSelect> *@
+        </MudItem>
+    </MudGrid>
+
+    @* 3. THE DATAGRID *@
+    <MudDataGrid T="Survey" Items="@_surveys" MultiSelection="true" @bind-SelectedItems="_selectedItems"
+                 Hover="true" Elevation="0" Class="rounded-xl border-none">
+
+                  <ToolBarContent>
+            <MudText Typo="Typo.h5" Style="color: #1B5E20;">Survey</MudText>
+            <MudSpacer />
+
+            <MudMenu Label="Add Survey"
+            Variant="Variant.Filled"
+            EndIcon="@Icons.Material.Filled.KeyboardArrowDown"
+            Style="background-color: #1B5E20; color: white;">
+
+                <MudMenuItem Icon="@Icons.Material.Filled.Add" OnClick="OpenDialog">
+                    Single
+                </MudMenuItem>
+            </MudMenu>
+
+                <MudMenuItem Icon="@Icons.Material.Filled.ImportExport">
+                    print
+                </MudMenuItem>
+
+            @* </MudMenu> *@
+        </ToolBarContent>
+
+          <ToolBarContent>
+            <MudText Typo="Typo.h5"  Style="color: #e0e7e0;">Survey</MudText>
+            <MudSpacer />
+            <MudMenu Label="Add Survey" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Style="background-color: #D35400; color: #FFFFFF; ">>
+                <MudMenuItem Icon="@Icons.Material.Filled.Add" OnClick="@(() => OpenDialog())">Single</MudMenuItem>
+                <MudMenuItem Icon="@Icons.Material.Filled.ImportExport">print</MudMenuItem>
+            </MudMenu>
+        </ToolBarContent>
+
+        <Columns>
+            <SelectColumn T="Survey" />
+            <HierarchyColumn T="Survey" />
+            <PropertyColumn Property="x => x.Id" Title="ID" />
+            <TemplateColumn>
+                <CellTemplate>
+                    @* <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudAvatar Size="Size.Small"><MudImage Src="@context.Item.AvatarUrl" /></MudAvatar>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">@context.Item.FirstName</MudText>
+                    </MudStack> *@
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.PropertyId" Title="PropertyId" />
+           
+            @* <PropertyColumn Property="x => x.AccountType.AccountTypeName" Title="AccountType" /> *@
+             <PropertyColumn Property="x => x.SurveyorName" Title="Surveyor Name" />
+              <PropertyColumn Property="x => x.SurveyDate" Title="Survey Date" />
+              <PropertyColumn Property="x => x.Coordinates" Title="Coordinates" />
+          </Columns>
+           
+      
+        <PagerContent>
+            <MudDataGridPager T="Survey" />
+        </PagerContent>
+    </MudDataGrid>
+</MudContainer>
+
+@code {
+     private string _searchString = "";
+
+       List<Survey> _surveys = new();
+
+           private HashSet<Survey> _selectedItems = new();
+
+      protected override async Task OnInitializedAsync()
+    {
+         await LoadSurvey();
+         
+    }
+    
+    private async Task OpenDialog()
+    {
+        DialogOptions options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        var dialog = await DialogService.ShowAsync<SurveyDialog>("Add Survey", options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+          
+             await LoadSurvey();
+        }
+    }
+     private async Task LoadSurvey()
+    {
+        _surveys = await SurveyService.GetAllSurveysAsync();
+        StateHasChanged();
+    }
+       @* private async Task OpenDetailDialog(int id)
+    {
+        var parameters = new DialogParameters<DisputeDetailDialog> { { x => x.Id, id } };
+        await DialogService.ShowAsync<DisputeDetailDialog>("View Details", parameters);
+    } *@
+
+
+
+
+}
